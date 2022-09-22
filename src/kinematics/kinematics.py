@@ -1,7 +1,7 @@
 from typing import Union, List
 import numpy as np
 import modern_robotics as mr
-from kinematics.utils import rot, transform
+from kinematics.utils import rot, transform, apply_transform
 
 
 class RobotKinematics():
@@ -45,14 +45,18 @@ class RobotKinematics():
 
         """
         x, y, z, phi = p
-        #phi = np.arctan2(z - self.link_lengths[0], np.sqrt(x**2 + y**2))
         theta1 = np.arctan2(*p[:2]) + np.array([0, np.pi])
 
         poses = np.zeros((4, 8))
         for i, _theta1 in enumerate(theta1):
-            # inverse kinematics for 3R chain
-            R = rot(0, 0, _theta1)  # rotation to 3R plane
-            p_3r = [*(R@p)[:2], phi]   # end-affector position in 3R plane
+            # transformation to 3R plane
+            T = self.transform_to_3r(self.link_lengths[0], _theta1)
+
+            # end-affector position in 3R plane
+            p_3r = []
+
+            p_3r = [*(T@p)[:2], phi]
+
             _joint_angles = self.ik_3r(p_3r, self.link_lengths[1:])
             # append _theta1 to _joint_angles (theta2-4 values)
             poses[:, i*4:(i+1)*4] =\
@@ -67,13 +71,12 @@ class RobotKinematics():
         # compute joint positions in 3R plane, (2, 4) initially
         pose_3r = np.array(self.joint_pos_3r(self.link_lengths[1:], pose[1:])).T
 
-        # append 1s to x position and last row for compatibility with T
-        # final shape is (4, 4), each column is a joint position (x, y, z, 1)
-        pose_3r = np.concatenate([pose_3r, np.zeros((1, 4)), np.ones((1, 4))],
-                                 axis=0)
+        # append 0s to z row
+        # final shape is (3, 4), each column is a joint position (x, y, z)
+        pose_3r = np.concatenate([pose_3r, np.zeros((1, 4))], axis=0)
 
-        # convert positions to stationary frame, discard 1s row
-        pose_3r = (T @ pose_3r)[:-1, :]
+        # convert positions to stationary frame
+        pose_3r = apply_transform(T, pose_3r)
 
         # origin at (0, 0, 0)
         origin = np.zeros((3, 1))

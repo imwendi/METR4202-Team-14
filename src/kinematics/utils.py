@@ -2,6 +2,28 @@ import numpy as np
 import modern_robotics as mr
 
 
+def apply_transform(T, p):
+    """
+    Applies transformation matrix to point
+
+    Args:
+        T: transformation matrix
+        p: point
+
+    Returns:
+        Transformed point
+
+    """
+    if (len(p.shape)) < 2:
+        # reshape (n,) to (n, 1) if needed
+        p = p.reshape((len(p), 1))
+
+    # append ones row
+    p = np.concatenate([p, np.ones((1, p.shape[-1]))], axis=0)
+
+    return (T @ p)[:-1, :]
+
+
 def rot(roll, pitch, yaw):
     """
     Create rotation matrix
