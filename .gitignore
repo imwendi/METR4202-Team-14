@@ -1,0 +1,9 @@
+# Pycharm files
+__pycache__/
+.idea/
+
+# Linux files
+*.swp
+*.pyc
+
+.venv
