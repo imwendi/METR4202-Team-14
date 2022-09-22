@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>metr4202_w7_prac</name>
+  <name>joint_controller</name>
   <version>0.0.0</version>
-  <description>The metr4202_w7_prac package</description>
+  <description>METR4202 Team 14 Joint Controller</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
