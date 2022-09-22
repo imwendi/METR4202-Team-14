@@ -41,6 +41,9 @@ def dummy_joint_states() -> JointState:
         random.uniform(-1.5, 1.5),
         random.uniform(-1.5, 1.5)
     ]
+
+    print("got here")
+
     return msg
 
 

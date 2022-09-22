@@ -13,6 +13,25 @@ class RobotKinematics():
     def __init__(self, link_lengths: Union[np.array, List[float]]):
         self.link_lengths = link_lengths
 
+    def compute_closest_norm(self, p, pose):
+        """
+        Computes inverse kinematics and selects pose closest (least l1 norm)
+        from a given current pose.
+
+        Args:
+            p: desired end-affector position (x, y, z)
+            pose: current pose (joint angle array)
+
+        Returns:
+            new optimal pose
+
+        """
+        new_poses = self.compute(p)
+        norm_val = np.linalg.norm(new_poses - pose.reshape((3, 1)))
+        pose_idx = np.argmin(norm_val, axis=-1)
+
+        return new_poses[pose_idx]
+
     def compute(self, p):
         """
         Computes inverse kinematics
@@ -21,24 +40,24 @@ class RobotKinematics():
             p: desired end-affector position (x, y, z)
 
         Returns:
-            possible joint angles to get to p
+            possible joint angles (poses) to get to p
 
         """
         x, y, z = p
         phi = np.arctan2(z - self.link_lengths[0], np.sqrt(x**2 + y**2))
         theta1 = np.arctan2(*p[:2]) + np.array([0, np.pi])
 
-        joint_angles = np.zeros((4, 8))
+        poses = np.zeros((4, 8))
         for i, _theta1 in enumerate(theta1):
             # inverse kinematics for 3R chain
             R = self.rot_to_3r(_theta1)  # rotation to 3R plane
             p_3r = [*(R@p)[:2], phi]   # end-affector position in 3R plane
             _joint_angles = self.ik_3r(p_3r, self.link_lengths[1:])
             # append _theta1 to _joint_angles (theta2-4 values)
-            joint_angles[:, i*4:(i+1)*4] =\
+            poses[:, i*4:(i+1)*4] =\
                 np.concatenate((np.ones((1, 4))*_theta1, _joint_angles))
 
-        return joint_angles
+        return poses
 
     @staticmethod
     def ik_3r(link_lengths, p):
