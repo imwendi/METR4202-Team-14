@@ -93,7 +93,7 @@ class RobotKinematics():
 
         Args:
             l1: first link length
-            theta1: first joint angle in thetas
+            theta1: first joint angle
 
         Returns:
 
@@ -113,7 +113,7 @@ class RobotKinematics():
             p: desired end-affector position (x, y, orientation)
 
         Returns:
-            joint angles (thetas) for joints 1-3, shape (3, 4),
+            joint angles for joints 1-3, shape (3, 4),
             angle combinations on columns
 
         """
