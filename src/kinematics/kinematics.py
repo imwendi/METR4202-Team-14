@@ -14,26 +14,26 @@ class RobotKinematics():
     def __init__(self, link_lengths: Union[np.array, List[float]]):
         self.link_lengths = link_lengths
 
-    def ik_closest_norm(self, p, phi, pose):
+    def ik_closest_norm(self, p, phi, thetas):
         """
-        Computes inverse kinematics and selects pose closest (least l1 norm)
-        from a given current pose.
+        Computes inverse kinematics and selects pos closest (least l1 norm)
+        from a given current pos.
 
         Args:
             p: desired end-affector position (x, y, z)
             phi: desired orientation in 3R plane TODO: for testing only
-            pose: current pose (joint angle array)
+            thetas: current joint angles
 
         Returns:
-            new optimal pose
+            new optimal pos
 
         """
-        new_poses = self.ik(p, phi)
+        new_joint_angles = self.ik(p, phi)
 
-        norm_val = np.linalg.norm(new_poses - pose.reshape((4, 1)))
+        norm_val = np.linalg.norm(new_joint_angles - thetas.reshape((4, 1)))
         pose_idx = np.argmin(norm_val, axis=-1)
 
-        return new_poses[:, pose_idx]
+        return new_joint_angles[:, pose_idx]
 
     def ik(self, p, phi):
         """
@@ -44,13 +44,13 @@ class RobotKinematics():
             phi: desired 3R orientation TODO: replace this with something better
 
         Returns:
-            possible joint angles (poses) to get to p
+            possible joint angles to get to p
 
         """
         x, y, z = p
         theta1 = np.arctan2(*p[:2]) + np.array([0, np.pi])
 
-        poses = np.zeros((4, 8))
+        joint_angles = np.zeros((4, 8))
         for i, _theta1 in enumerate(theta1):
             # transformation to 3R plane
             T = self.transform_to_3r(self.link_lengths[0], _theta1)
@@ -60,30 +60,30 @@ class RobotKinematics():
 
             _joint_angles = self.ik_3r(self.link_lengths[1:], p_3r)
             # append _theta1 to _joint_angles (theta2-4 values)
-            poses[:, i*4:(i+1)*4] =\
+            joint_angles[:, i*4:(i+1)*4] =\
                 np.concatenate((np.ones((1, 4))*_theta1, _joint_angles))
 
-        return poses
+        return joint_angles
 
-    def joint_pos(self, pose):
+    def joint_pos(self, pos):
         # transformation matrix, 3R to stationary frame
-        T = self.transform_to_3r(self.link_lengths[0], pose[0])
+        T = self.transform_to_3r(self.link_lengths[0], pos[0])
 
         # compute joint positions in 3R plane, (2, 4) initially
-        pose_3r = np.array(self.joint_pos_3r(self.link_lengths[1:], pose[1:])).T
+        pos_3r = np.array(self.joint_pos_3r(self.link_lengths[1:], pos[1:])).T
 
         # append 0s to z row
         # final shape is (3, 4), each column is a joint position (x, y, z)
-        pose_3r = np.concatenate([pose_3r, np.zeros((1, 4))], axis=0)
+        pos_3r = np.concatenate([pos_3r, np.zeros((1, 4))], axis=0)
 
         # convert positions to stationary frame
-        pose_3r = apply_transform(T, pose_3r)
+        pos_3r = apply_transform(T, pos_3r)
 
         # origin at (0, 0, 0)
         origin = np.zeros((3, 1))
 
         # combine positions
-        return np.concatenate([origin, pose_3r], axis=-1)
+        return np.concatenate([origin, pos_3r], axis=-1)
 
     # ______________________________ 3R methods ________________________________
     @staticmethod
@@ -93,7 +93,7 @@ class RobotKinematics():
 
         Args:
             l1: first link length
-            theta1: first joint angle in pose
+            theta1: first joint angle in thetas
 
         Returns:
 
@@ -113,7 +113,7 @@ class RobotKinematics():
             p: desired end-affector position (x, y, orientation)
 
         Returns:
-            joint angles (pose) for joints 1-3, shape (3, 4),
+            joint angles (thetas) for joints 1-3, shape (3, 4),
             angle combinations on columns
 
         """

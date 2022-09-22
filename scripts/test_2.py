@@ -64,7 +64,7 @@ def main():
         inverse_kinematics # Callback function (required)
     )
 
-    # publisher for pose
+    # publisher for thetas
 
     rate = rospy.Rate(1)
 

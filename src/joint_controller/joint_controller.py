@@ -12,9 +12,9 @@ from definitions import *
 
 class JointController():
     def __init__(self, link_lengths=None):
-        # desired pose subscriber
+        # desired thetas subscriber
         self.desired_pose_sub =\
-            rospy.Subscriber(NODE_DESIRED_POS, Pose, self.get_pose())
+            rospy.Subscriber(NODE_DESIRED_POS, Pose, self.publish_desired_pose())
 
         # desired joint states publisher
         self.desired_joint_state_pub =\
@@ -27,7 +27,7 @@ class JointController():
         self.link_lengths = link_lengths
         self.rk = RobotKinematics(link_lengths)
 
-    def get_pose(self):
+    def publish_desired_pose(self, pose: Pose):
         pass
 
 
