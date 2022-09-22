@@ -14,37 +14,40 @@ class RobotKinematics():
     def __init__(self, link_lengths: Union[np.array, List[float]]):
         self.link_lengths = link_lengths
 
-    def ik_closest_norm(self, p, pose):
+    def ik_closest_norm(self, p, phi, pose):
         """
         Computes inverse kinematics and selects pose closest (least l1 norm)
         from a given current pose.
 
         Args:
             p: desired end-affector position (x, y, z)
+            phi: desired orientation in 3R plane TODO: for testing only
             pose: current pose (joint angle array)
 
         Returns:
             new optimal pose
 
         """
-        new_poses = self.ik(p)
-        norm_val = np.linalg.norm(new_poses - pose.reshape((3, 1)))
+        new_poses = self.ik(p, phi)
+
+        norm_val = np.linalg.norm(new_poses - pose.reshape((4, 1)))
         pose_idx = np.argmin(norm_val, axis=-1)
 
-        return new_poses[pose_idx]
+        return new_poses[:, pose_idx]
 
-    def ik(self, p):
+    def ik(self, p, phi):
         """
         Computes inverse kinematics
 
         Args:
             p: desired end-affector position (x, y, z)
+            phi: desired 3R orientation TODO: replace this with something better
 
         Returns:
             possible joint angles (poses) to get to p
 
         """
-        x, y, z, phi = p
+        x, y, z = p
         theta1 = np.arctan2(*p[:2]) + np.array([0, np.pi])
 
         poses = np.zeros((4, 8))
@@ -52,12 +55,10 @@ class RobotKinematics():
             # transformation to 3R plane
             T = self.transform_to_3r(self.link_lengths[0], _theta1)
 
-            # end-affector position in 3R plane
-            p_3r = []
+            # end-affector (x, y, phi) position in 3R plane
+            p_3r = [*apply_transform(mr.TransInv(T), p)[:2], phi]
 
-            p_3r = [*(T@p)[:2], phi]
-
-            _joint_angles = self.ik_3r(p_3r, self.link_lengths[1:])
+            _joint_angles = self.ik_3r(self.link_lengths[1:], p_3r)
             # append _theta1 to _joint_angles (theta2-4 values)
             poses[:, i*4:(i+1)*4] =\
                 np.concatenate((np.ones((1, 4))*_theta1, _joint_angles))
