@@ -14,7 +14,7 @@ class RobotKinematics():
     def __init__(self, link_lengths: Union[np.array, List[float]]):
         self.link_lengths = link_lengths
 
-    def compute_closest_norm(self, p, pose):
+    def ik_closest_norm(self, p, pose):
         """
         Computes inverse kinematics and selects pose closest (least l1 norm)
         from a given current pose.
@@ -27,13 +27,13 @@ class RobotKinematics():
             new optimal pose
 
         """
-        new_poses = self.compute(p)
+        new_poses = self.ik(p)
         norm_val = np.linalg.norm(new_poses - pose.reshape((3, 1)))
         pose_idx = np.argmin(norm_val, axis=-1)
 
         return new_poses[pose_idx]
 
-    def compute(self, p):
+    def ik(self, p):
         """
         Computes inverse kinematics
 
@@ -44,8 +44,8 @@ class RobotKinematics():
             possible joint angles (poses) to get to p
 
         """
-        x, y, z = p
-        phi = np.arctan2(z - self.link_lengths[0], np.sqrt(x**2 + y**2))
+        x, y, z, phi = p
+        #phi = np.arctan2(z - self.link_lengths[0], np.sqrt(x**2 + y**2))
         theta1 = np.arctan2(*p[:2]) + np.array([0, np.pi])
 
         poses = np.zeros((4, 8))
@@ -62,9 +62,7 @@ class RobotKinematics():
 
     def joint_pos(self, pose):
         # transformation matrix, 3R to stationary frame
-        p = np.array([0, 0, self.link_lengths[0]])
-        R = rot(0, 0, pose[0]) @ rot(0, -np.pi/2, 0)
-        T = mr.RpToTrans(R, p)
+        T = self.transform_to_3r(self.link_lengths[0], pose[0])
 
         # compute joint positions in 3R plane, (2, 4) initially
         pose_3r = np.array(self.joint_pos_3r(self.link_lengths[1:], pose[1:])).T
@@ -84,6 +82,23 @@ class RobotKinematics():
         return np.concatenate([origin, pose_3r], axis=-1)
 
     # ______________________________ 3R methods ________________________________
+    @staticmethod
+    def transform_to_3r(l1, theta1):
+        """
+        Compute transformation to 3R plane
+
+        Args:
+            l1: first link length
+            theta1: first joint angle in pose
+
+        Returns:
+
+        """
+        p = np.array([0, 0, l1])
+        R = rot(0, 0, theta1) @ rot(0, -np.pi / 2, 0)
+
+        return mr.RpToTrans(R, p)
+
 
     @staticmethod
     def ik_3r(link_lengths, p):
