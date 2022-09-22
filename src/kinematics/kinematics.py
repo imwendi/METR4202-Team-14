@@ -63,7 +63,7 @@ class RobotKinematics():
     def joint_pos(self, pose):
         # transformation matrix, 3R to stationary frame
         p = np.array([0, 0, self.link_lengths[0]])
-        R = rot(0, 0, pose[0]) @ rot(np.pi/2, 0, 0)
+        R = rot(0, 0, pose[0]) @ rot(0, -np.pi/2, 0)
         T = mr.RpToTrans(R, p)
 
         # compute joint positions in 3R plane, (2, 4) initially
@@ -139,7 +139,7 @@ class RobotKinematics():
         total_angle = 0
         for i in range(3):
             total_angle += joint_angles[i]
-            pos_delta = np.array([np.sin(total_angle), np.cos(total_angle)])
+            pos_delta = np.array([np.cos(total_angle), np.sin(total_angle)])
 
             joint_positions.append(joint_positions[i] + link_lengths[i]*pos_delta)
 
