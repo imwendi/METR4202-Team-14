@@ -7,18 +7,26 @@ from geometry_msgs.msg import Pose
 
 # local modules
 from kinematics.kinematics import RobotKinematics
-from definitions import *
+from joint_controller.definitions import *
+from joint_controller.utils import numpify
 
 
 class JointController():
     def __init__(self, link_lengths=None):
-        # desired thetas subscriber
+        # current joint state
+        self.joint_state = JointState()
+        # joint states subscriber
+        self.joint_state_sub = rospy.Subscriber(NODE_JOINT_STATES,
+                                                JointState,
+                                                self._update_joint_state)
+
+        # desired pose subscriber
         self.desired_pose_sub =\
-            rospy.Subscriber(NODE_DESIRED_POS, Pose, self.publish_desired_pose())
+            rospy.Subscriber(NODE_DESIRED_POS, Pose, self._publish_desired_pose)
 
         # desired joint states publisher
         self.desired_joint_state_pub =\
-            rospy.Publisher(NODE_DESIRED_JOINT_STATES, Pose, queue_size=10)
+            rospy.Publisher(NODE_DESIRED_JOINT_STATES, JointState, queue_size=10)
 
         # configure RobotKinematics computation class
         if link_lengths is None:
@@ -27,7 +35,38 @@ class JointController():
         self.link_lengths = link_lengths
         self.rk = RobotKinematics(link_lengths)
 
-    def publish_desired_pose(self, pose: Pose):
-        pass
+    def _publish_desired_pose(self, pose: Pose):
+        current_joint_angles = self._get_joint_angles()
+        desired_position = numpify(pose.position)
+        phi = 0 # TODO: for testing only!
+
+        print("desired pos is ", desired_position)
+
+        new_joint_angles =\
+            self.rk.ik_closest_norm(desired_position, phi, current_joint_angles)
+
+        print("moving to ", new_joint_angles)
+
+        # create and publish JointState message
+        msg = JointState(
+            # Set header with current time
+            header=Header(stamp=rospy.Time.now()),
+            # Specify joint names (see `controller_config.yaml` under `dynamixel_interface/config`)
+            name=['joint_1', 'joint_2', 'joint_3', 'joint_4'],
+            position=new_joint_angles,
+            velocity=np.ones(4)*DEFAULT_VELOCITY
+        )
+        self.desired_joint_state_pub.publish(msg)
+
+    def _get_joint_angles(self):
+        """
+        Returns:
+            current joint angles
+
+        """
+        return np.array(self.joint_state.position)
+
+    def _update_joint_state(self, joint_state: JointState):
+        self.joint_state = joint_state
 
 
