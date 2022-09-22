@@ -103,7 +103,6 @@ class RobotKinematics():
 
         return mr.RpToTrans(R, p)
 
-
     @staticmethod
     def ik_3r(link_lengths, p):
         """

@@ -23,10 +23,10 @@ x_slide = Slider(ax_x, 'End-affector x', 0, lim, 0)
 y_slide = Slider(ax_y, 'End-affector y', 0, lim, 0)
 phi_slide = Slider(ax_phi, 'orientation', 0, 2*np.pi, 0)
 
-joint_angles = np.zeros((3, 1))
+current_pose = np.zeros((3, 1))
 
 def update(val):
-    global joint_angles, last_plot, ax
+    global current_pose, last_plot, ax
     x = x_slide.val
     y = y_slide.val
     phi = phi_slide.val
