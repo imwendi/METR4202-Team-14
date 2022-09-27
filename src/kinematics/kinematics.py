@@ -60,8 +60,8 @@ class RobotKinematics():
 
             _joint_angles = self.ik_3r(self.link_lengths[1:], p_3r)
             # append _theta1 to _joint_angles (theta2-4 values)
-            joint_angles[:, i*4:(i+1)*4] =\
-                np.concatenate((np.ones((1, 4))*_theta1, _joint_angles))
+            joint_angles[:, i*2:(i+1)*2] =\
+                np.concatenate((np.ones((1, 2))*_theta1, _joint_angles))
 
         return joint_angles
 
