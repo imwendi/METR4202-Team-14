@@ -18,7 +18,7 @@ DEFAULT_LINK_LENGTHS = np.array([L1, L2, L3, L4])
 L = np.sum(DEFAULT_LINK_LENGTHS)
 
 # motion
-DEFAULT_VELOCITY = 0.0001 # [m/s]
+DEFAULT_VELOCITY = 0.5 # [rad/s]
 
 
 

@@ -9,9 +9,9 @@ import rospy
 from geometry_msgs.msg import Pose, Point
 from joint_controller.definitions import *
 
-STEP_SIZE = 2   # [mm]
+STEP_SIZE = 10   # [mm]
 START_Z = L     # [mm]
-END_Z = L - 20      # [mm]
+END_Z = L - 50      # [mm]
 DELAY = 0.5       # [s]
 
 pose_pub = rospy.Publisher(NODE_DESIRED_POS,
