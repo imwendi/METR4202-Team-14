@@ -35,8 +35,8 @@ def update(val):
     z = z_slide.val
     phi = phi_slide.val
 
-    current_pose = rk.ik_closest_norm(np.array([x, y, z]), phi, current_pose)
-    joint_pos = rk.joint_pos(current_pose)
+    joint_angles = rk.ik_closest_norm(np.array([x, y, z]), phi, joint_angles)
+    joint_pos = rk.joint_pos(joint_angles)
 
     ax.clear()
     lim = 4
