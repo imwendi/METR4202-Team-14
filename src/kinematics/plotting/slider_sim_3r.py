@@ -34,7 +34,7 @@ def update(val):
     new_angles = rk.ik_3r(link_lengths[1:], [x, y, phi])
     # get joint_angles closest to existing
     norm_val = np.linalg.norm(new_angles - joint_angles.reshape((3, 1)))
-    angle_idx = np.argmin(norm_val, axis=-1)
+    angle_idx = 0 # 1 or 2
     joint_angles = new_angles[:, angle_idx]
     joint_pos = rk.joint_pos_3r(link_lengths[1:], joint_angles)
 

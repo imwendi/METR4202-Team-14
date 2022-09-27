@@ -131,11 +131,14 @@ class RobotKinematics():
         # compute possible theta3 values
         a, b = x - l3*c_phi, y - l3*s_phi
         c = (a**2 + b**2 + l1**2 - l2**2) / (2*l1)
-        theta1 = np.arctan2(a, b) +\
-                 options*np.arctan2(c, np.sqrt(a**2 + b**2 - c**2))
+
+        theta1 = np.arctan2(b, a) + \
+                 -options * np.arctan2(np.sqrt(a**2 + b**2 - c**2), c)
+        # equivaelent alternative computation
+        #theta1 = np.arctan2(x, y) - np.arctan2(l2*np.sin(theta2), l1 + l2*np.cos(theta2))
 
         # find all combinations of theta2, theta3 values
-        theta = RobotKinematics.array_combine(theta1, theta2)
+        theta = np.stack((theta1, theta2), axis=0)
         theta3 = phi - np.sum(theta, axis=0, keepdims=True)
         theta = np.concatenate((theta, theta3), axis=0)
 
@@ -166,6 +169,8 @@ class RobotKinematics():
     @staticmethod
     def array_combine(a, b):
         """
+        TODO: depreciated, not used anymore
+
         Computes all combinations of values in two arrays
 
         Args:
