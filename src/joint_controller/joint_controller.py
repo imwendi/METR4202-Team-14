@@ -6,7 +6,7 @@ from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
 
 # local modules
-from kinematics.kinematics import RobotKinematics
+from kinematics.kinematics_base import KinematicsBase
 from joint_controller.definitions import *
 from joint_controller.utils import numpify
 
@@ -33,7 +33,7 @@ class JointController():
             # use default link lengths
             link_lengths = DEFAULT_LINK_LENGTHS
         self.link_lengths = link_lengths
-        self.rk = RobotKinematics(link_lengths)
+        self.rk = KinematicsBase(link_lengths)
 
     def _publish_desired_pose(self, pose: Pose):
         current_joint_angles = self._get_joint_angles()

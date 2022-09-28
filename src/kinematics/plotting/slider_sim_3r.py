@@ -1,13 +1,13 @@
 import sys
 
 from matplotlib.widgets import Slider, Button
-from kinematics.kinematics import RobotKinematics
+from kinematics.kinematics_base import KinematicsBase
 from kinematics.collision import intersect_connected_segments
 from plotter import *
 
 
 link_lengths = np.array([1, 1, 1, 1])
-rk = RobotKinematics(link_lengths)
+rk = KinematicsBase(link_lengths)
 
 # setup plot axes
 fig, ax = plt.subplots()
@@ -38,7 +38,7 @@ def update(val):
     if intersect_connected_segments(joint_pos):
         print("Collision!!!", file=sys.stderr)
     else:
-        print("No collision")
+        print("\n")
 
     ax.clear()
     lim = 4

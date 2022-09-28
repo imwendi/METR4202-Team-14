@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from kinematics.kinematics import RobotKinematics
+from kinematics.kinematics_base import KinematicsBase
 from kinematics.plotting.plotter import plot_4r_robot
 
-rk = RobotKinematics([1, 1, 1, 1])
+rk = KinematicsBase([1, 1, 1, 1])
 
 pose = np.deg2rad(np.array([0, 0, 0, 0]))
 joint_positions = rk.joint_pos([0, 0, 0, 0])
