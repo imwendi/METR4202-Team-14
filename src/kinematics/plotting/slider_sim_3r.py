@@ -1,4 +1,4 @@
-from matplotlib.widgets import Slider
+from matplotlib.widgets import Slider, Button
 from kinematics.kinematics import RobotKinematics
 from plotter import *
 
@@ -14,16 +14,10 @@ plt.subplots_adjust(bottom=0.35)
 ax_x = plt.axes([0.25, 0.2, 0.65, 0.03])
 ax_y = plt.axes([0.25, 0.15, 0.65, 0.03])
 ax_phi = plt.axes([0.25, 0.1, 0.65, 0.03])
-
-x_lim = []
-
 lim = 2.999999
-
 x_slide = Slider(ax_x, 'End-affector x', 0, lim, 0)
-y_slide = Slider(ax_y, 'End-affector y', -lim/2, lim/2, 0)
+y_slide = Slider(ax_y, 'End-affector y', -lim, lim, 0)
 phi_slide = Slider(ax_phi, 'orientation', 0, 2*np.pi, 0)
-
-joint_angles = np.zeros((3, 1))
 
 def update(val):
     global joint_angles, last_plot, ax
@@ -44,10 +38,24 @@ def update(val):
     ax.set_ylim([-lim, lim])
     last_plot = plot_3r_robot(joint_pos, ax)
 
-update(None)
-x_slide.on_changed(update)
-y_slide.on_changed(update)
-phi_slide.on_changed(update)
+# slider reset button
+# Create a `matplotlib.widgets.Button` to reset the sliders to initial values.
+resetax = fig.add_axes([0.8, 0.025, 0.1, 0.04])
+button = Button(resetax, 'Reset', hovercolor='0.975')
+def reset(event):
+    pass
+    x_slide.reset()
+    y_slide.reset()
+    phi_slide.reset()
+button.on_clicked(reset)
+
+joint_angles = np.zeros((3, 1))
 
 
-plt.show()
+if __name__ == '__main__':
+    update(None)
+    x_slide.on_changed(update)
+    y_slide.on_changed(update)
+    phi_slide.on_changed(update)
+
+    plt.show()
