@@ -1,5 +1,8 @@
+import sys
+
 from matplotlib.widgets import Slider, Button
 from kinematics.kinematics import RobotKinematics
+from kinematics.collision import intersect_connected_segments
 from plotter import *
 
 
@@ -17,7 +20,7 @@ ax_phi = plt.axes([0.25, 0.1, 0.65, 0.03])
 lim = 2.999999
 x_slide = Slider(ax_x, 'End-affector x', 0, lim, 0)
 y_slide = Slider(ax_y, 'End-affector y', -lim, lim, 0)
-phi_slide = Slider(ax_phi, 'orientation', 0, 2*np.pi, 0)
+phi_slide = Slider(ax_phi, 'orientation', -np.pi, np.pi, 0)
 
 def update(val):
     global joint_angles, last_plot, ax
@@ -27,10 +30,15 @@ def update(val):
 
     new_angles = rk.ik_3r(link_lengths[1:], [x, y, phi])
     # get joint_angles closest to existing
-    norm_val = np.linalg.norm(new_angles - joint_angles.reshape((3, 1)))
-    angle_idx = 0 # 1 or 2
+    angle_idx = 0
     joint_angles = new_angles[:, angle_idx]
     joint_pos = rk.joint_pos_3r(link_lengths[1:], joint_angles)
+
+    # get collision
+    if intersect_connected_segments(joint_pos):
+        print("Collision!!!", file=sys.stderr)
+    else:
+        print("No collision")
 
     ax.clear()
     lim = 4
