@@ -98,10 +98,10 @@ class KinematicsBase():
         Returns:
 
         """
-        p = np.array([0, 0, l1])
-        R = rot(0, 0, theta1) @ rot(0, -np.pi / 2, 0)
+        T1 = mr.RpToTrans(rot(0, 0, theta1), np.array([0, 0, l1]))
+        T2 = mr.RpToTrans(rot(0, -np.pi / 2, 0) @ rot(np.pi/2, 0, 0), np.zeros(3))
 
-        return mr.RpToTrans(R, p)
+        return T2@T1
 
     @staticmethod
     def ik_3r(link_lengths, p):

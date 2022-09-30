@@ -68,5 +68,3 @@ class JointController():
 
     def _update_joint_state(self, joint_state: JointState):
         self.joint_state = joint_state
-
-
