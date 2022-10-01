@@ -67,3 +67,18 @@ def transform(pitch, roll, yaw, dx, dy, dz):
     """
 
     return mr.RpToTrans(rot(pitch, roll, yaw), np.array([dx, dy, dz]))
+
+
+def polar2r(r, theta):
+    """
+    Polar to cartesian conversion
+
+    Args:
+        r: radius
+        theta: angle
+
+    Returns:
+        Cartesian coordinates
+
+    """
+    return np.array([r*np.cos(theta), r*np.sin(theta)])
