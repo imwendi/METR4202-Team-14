@@ -13,30 +13,24 @@ ax = plt.axes(projection='3d')
 plt.subplots_adjust(bottom=0.35)
 
 # sliders
-ax_x = plt.axes([0.25, 0.2, 0.65, 0.03])
-ax_y = plt.axes([0.25, 0.15, 0.65, 0.03])
-ax_z = plt.axes([0.25, 0.1, 0.65, 0.03])
-ax_phi = plt.axes([0.25, 0.05, 0.65, 0.03])
+ax0 = plt.axes([0.25, 0.2, 0.65, 0.03])
+ax1 = plt.axes([0.25, 0.15, 0.65, 0.03])
+ax2 = plt.axes([0.25, 0.1, 0.65, 0.03])
+ax3 = plt.axes([0.25, 0.05, 0.65, 0.03])
 
 lim = 3.999999
 
-x_slide = Slider(ax_x, 'End-affector x', 0, lim, 0)
-y_slide = Slider(ax_y, 'End-affector y', 0, lim, 0)
-z_slide = Slider(ax_z, 'End-affector z', 0, lim, lim/2)
-phi_slide = Slider(ax_phi, 'orientation', -np.pi, np.pi, 0)
+slide_0 = Slider(ax0, 'joint angle 0', -np.pi, np.pi, 0)
+slide_1 = Slider(ax1, 'joint angle 1', -np.pi, np.pi, 0)
+slide_2 = Slider(ax2, 'joint angle 3', -np.pi, np.pi, 0)
+slide_3 = Slider(ax3, 'joint angle 4', -np.pi, np.pi, 0)
 
 joint_angles = np.zeros((4, 1))
-
+sliders = [slide_0, slide_1, slide_2, slide_3]
 
 def update(val):
     global rk, joint_angles, last_plot, ax
-    x = x_slide.val
-    y = y_slide.val
-    z = z_slide.val
-    phi = phi_slide.val
-
-    joint_angles = rk.ik(np.array([x, y, z]), phi)[:, 3]
-    print(joint_angles)
+    joint_angles = [slider.val for slider in sliders]
     joint_pos = rk.joint_pos_geom(joint_angles)
 
     # get collision
@@ -62,19 +56,15 @@ resetax = fig.add_axes([0.8, 0.025, 0.1, 0.04])
 button = Button(resetax, 'Reset', hovercolor='0.975')
 def reset(event):
     pass
-    x_slide.reset()
-    y_slide.reset()
-    z_slide.reset()
-    phi_slide.reset()
+    for slider in sliders:
+        slider.reset()
 button.on_clicked(reset)
 
 
 if __name__ == '__main__':
     update(None)
-    x_slide.on_changed(update)
-    y_slide.on_changed(update)
-    z_slide.on_changed(update)
-    phi_slide.on_changed(update)
-
+    for slider in sliders:
+        slider.on_changed(update)
 
     plt.show()
+    

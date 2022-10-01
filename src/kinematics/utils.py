@@ -21,7 +21,7 @@ def apply_transform(T, p):
     # append ones row
     p = np.concatenate([p, np.ones((1, p.shape[-1]))], axis=0)
 
-    return (T @ p)[:-1, :]
+    return (T @ p)[:-1, :].squeeze()
 
 
 def rot(roll, pitch, yaw):

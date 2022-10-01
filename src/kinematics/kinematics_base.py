@@ -13,9 +13,20 @@ class KinematicsBase():
     """
     def __init__(self, link_lengths: Union[np.array, List[float]]):
         self.link_lengths = link_lengths
+        # space home config.
+        self.M = np.eye(4); self.M[2, 3] = np.sum(link_lengths)
+        print(self.M)
+        # forward kinematics space screws, as matrix columns
+        l0, l1, l2, l3 = self.link_lengths
+        self.screws = np.array([[0, 0, 1, 0, 0, 0],
+                                [1, 0, 0, 0, l0+l1, 0],
+                                [1, 0, 0, 0, l0+l1+l2, 0],
+                                [1, 0, 0, 0, l0+l1+l2+l3, 0]]).T
 
     def ik_closest_norm(self, p, phi, thetas):
         """
+        TODO: depreciated?
+
         Computes inverse kinematics and selects pos closest (least l1 norm)
         from a given current pos.
 
@@ -35,6 +46,20 @@ class KinematicsBase():
 
         return new_joint_angles[:, pose_idx]
 
+    def fk(self, joint_angles) -> np.array:
+        """
+        Space forward kinematics for given set of joint angles
+
+        Args:
+            joint_angles: configuration joint angles
+
+        Returns:
+            Transformation matrix from home config
+
+        """
+
+        return mr.FKinSpace(self.M, self.screws, joint_angles)
+
     def ik(self, p, phi):
         """
         Computes inverse kinematics
@@ -47,30 +72,65 @@ class KinematicsBase():
             possible joint angles to get to p
 
         """
-        x, y, z = p
-        theta1 = np.arctan2(*p[:2]) + np.array([0, np.pi])
+        theta1 = np.arctan2(p[1], p[0]) + np.array([0, np.pi])
 
-        joint_angles = np.zeros((4, 8))
+        joint_angles = np.zeros((4, 4))
         for i, _theta1 in enumerate(theta1):
             # transformation to 3R plane
-            T = self.transform_to_3r(self.link_lengths[0], _theta1)
+            T = self.transform_from_3r(self.link_lengths[0], _theta1)
 
             # end-affector (x, y, phi) position in 3R plane
             p_3r = [*apply_transform(mr.TransInv(T), p)[:2], phi]
-
             _joint_angles = self.ik_3r(self.link_lengths[1:], p_3r)
+
             # append _theta1 to _joint_angles (theta2-4 values)
             joint_angles[:, i*2:(i+1)*2] =\
-                np.concatenate((np.ones((1, 2))*_theta1, _joint_angles))
+                np.concatenate((np.ones((1, 2))*_theta1, _joint_angles), axis=0)
 
         return joint_angles
 
-    def joint_pos(self, pos):
-        # transformation matrix, 3R to stationary frame
-        T = self.transform_to_3r(self.link_lengths[0], pos[0])
+    def joint_pos_fk(self, joint_angles):
+        """
+        Forward kinematics based joint position computation
+
+        Args:
+            joint_angles: configuration joint angles
+
+        Returns:
+            list of joint coordinates in the stationary plane
+            [p0, p1, p2, p3, p_end], p0 is at the origin
+
+        """
+        T = self.fk(joint_angles)
+        joint_pos = [np.zeros(3)]*5
+
+        # compute each positions of joints 2, 3, 4, tip
+        curr_pos = np.zeros(3)
+        for i, l in enumerate(self.link_lengths):
+            # joint position in home configuration
+            curr_pos[-1] += l
+            joint_pos[i+1] = apply_transform(T, curr_pos)
+
+
+        return joint_pos
+
+    def joint_pos_geom(self, joint_angles):
+        """
+        Geometry based joint position computation
+
+        Args:
+            joint_angles: configuration joint angles
+
+        Returns:
+            list of joint coordinates in the stationary plane
+            [p0, p1, p2, p3, p_end], p0 is at the origin
+
+        """
+        # transformation matrix from 3R to stationary frame
+        T = self.transform_from_3r(self.link_lengths[0], joint_angles[0])
 
         # compute joint positions in 3R plane, (2, 4) initially
-        pos_3r = np.array(self.joint_pos_3r(self.link_lengths[1:], pos[1:])).T
+        pos_3r = np.array(self.joint_pos_3r(self.link_lengths[1:], joint_angles[1:])).T
 
         # append 0s to z row
         # final shape is (3, 4), each column is a joint position (x, y, z)
@@ -87,7 +147,7 @@ class KinematicsBase():
 
     # ______________________________ 3R methods ________________________________
     @staticmethod
-    def transform_to_3r(l1, theta1):
+    def transform_from_3r(l1, theta1):
         """
         Compute transformation to 3R plane
 
@@ -98,10 +158,12 @@ class KinematicsBase():
         Returns:
 
         """
-        T1 = mr.RpToTrans(rot(0, 0, theta1), np.array([0, 0, l1]))
-        T2 = mr.RpToTrans(rot(0, -np.pi / 2, 0) @ rot(np.pi/2, 0, 0), np.zeros(3))
+        # T1 = mr.RpToTrans(rot(0, 0, theta1), np.array([0, 0, l1]))
+        # T2 = mr.RpToTrans(rot(0, -np.pi/2, 0) @ rot(-np.pi/2, 0, 0), np.zeros(3))
+        #
+        # return T2@T1
 
-        return T2@T1
+        return mr.RpToTrans(rot(-np.pi / 2, -np.pi / 2, theta1), np.array([0, 0, l1]))
 
     @staticmethod
     def ik_3r(link_lengths, p):
@@ -147,6 +209,8 @@ class KinematicsBase():
     @staticmethod
     def joint_pos_3r(link_lengths, joint_angles):
         """
+        Geometry-based joint position computation for 3R chain
+
         Args:
             link_lengths: 3R link lengths
             joint_angles: 3R chain joint angles
