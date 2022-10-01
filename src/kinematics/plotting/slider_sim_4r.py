@@ -36,8 +36,8 @@ def update(val):
     phi = phi_slide.val
 
     joint_angles = rk.ik(np.array([x, y, z]), phi)[:, 3]
-    print(joint_angles)
-    joint_pos = rk.joint_pos_geom(joint_angles)
+    #print(joint_angles)
+    joint_pos = rk.joint_pos(joint_angles)
 
     # get collision
     if rk.check_self_collision(joint_angles):

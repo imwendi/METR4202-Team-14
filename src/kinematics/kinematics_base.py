@@ -15,7 +15,7 @@ class KinematicsBase():
                  base_height: float,
                  link_lengths: Union[np.array, List[float]]):
         """
-
+        Constructor
 
         Args:
             base_height: height from ground of first joint
@@ -29,9 +29,11 @@ class KinematicsBase():
             self.transform_from_3r(base_height + link_lengths[0], theta1)
 
         # space home config.
-        self.M = np.eye(4); self.M[2, 3] = np.sum(link_lengths)
+        self.M = np.eye(4); self.M[2, 3] = np.sum(base_height + link_lengths)
+
         # forward kinematics space screws, as matrix columns
-        l0, l1, l2, l3 = self.link_lengths
+        l0 = base_height
+        l1, l2, l3, l4 = self.link_lengths
         self.screws = np.array([[0, 0, 1, 0, 0, 0],
                                 [1, 0, 0, 0, l0+l1, 0],
                                 [1, 0, 0, 0, l0+l1+l2, 0],
@@ -103,32 +105,37 @@ class KinematicsBase():
 
         return joint_angles
 
-    def joint_pos_fk(self, joint_angles):
-        """
-        Forward kinematics based joint position computation
+    # TODO: old, remove?
+    # def joint_pos_fk(self, joint_angles):
+    #     """
+    #     Forward kinematics based joint position computation
+    #
+    #     Args:
+    #         joint_angles: configuration joint angles
+    #
+    #     Returns:
+    #         list of joint coordinates in the stationary plane
+    #         [p0, p1, p2, p3, p_end], p0 is at the origin
+    #
+    #     """
+    #     joint_pos = [np.zeros(3)]*5
+    #
+    #     l1, l2, l3, l4 = self.link_lengths
+    #
+    #     # compute each positions of joints 1, 2, 3, 4, tip
+    #     M = np.eye(4)
+    #     curr_pos = np.array([0, 0, self.base_height])
+    #     for i, l in enumerate(self.link_lengths):
+    #         M[2, 3] += l
+    #         T = mr.FKinSpace(M, self.screws[:, :i+1], joint_angles[:i+1])
+    #         # joint position in home configuration
+    #         joint_pos[i+1] = apply_transform(T, curr_pos)
+    #         curr_pos[-1] += l
+    #
+    #
+    #     return joint_pos
 
-        Args:
-            joint_angles: configuration joint angles
-
-        Returns:
-            list of joint coordinates in the stationary plane
-            [p0, p1, p2, p3, p_end], p0 is at the origin
-
-        """
-        T = self.fk(joint_angles)
-        joint_pos = [np.zeros(3)]*5
-
-        # compute each positions of joints 2, 3, 4, tip
-        curr_pos = np.zeros(3)
-        for i, l in enumerate(self.link_lengths):
-            # joint position in home configuration
-            curr_pos[-1] += l
-            joint_pos[i+1] = apply_transform(T, curr_pos)
-
-
-        return joint_pos
-
-    def joint_pos_geom(self, joint_angles):
+    def joint_pos(self, joint_angles):
         """
         Geometry based joint position computation
 
@@ -153,11 +160,11 @@ class KinematicsBase():
         # convert positions to stationary frame
         pos_3r = apply_transform(T, pos_3r)
 
-        # base at (0, 0, base_height)
-        base = np.array([0, 0, self.base_height]).reshape((3, 1))
+        # joint 1 at (0, 0, base_height)
+        joint_1 = np.array([0, 0, self.base_height]).reshape((3, 1))
 
         # combine positions
-        return np.concatenate([base, pos_3r], axis=-1)
+        return np.concatenate([joint_1, pos_3r], axis=-1)
 
     # ______________________________ 3R methods ________________________________
     @staticmethod

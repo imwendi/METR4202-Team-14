@@ -6,7 +6,7 @@ from kinematics.plotting.plotter import plot_4r_robot
 rk = KinematicsBase([1, 1, 1, 1])
 
 pose = np.deg2rad(np.array([0, 0, 0, 0]))
-joint_positions = rk.joint_pos_geom([0, 0, 0, 0])
+joint_positions = rk.joint_pos([0, 0, 0, 0])
 
 ax = plt.axes(projection='3d')
 lim = 3.99999

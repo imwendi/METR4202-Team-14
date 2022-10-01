@@ -31,7 +31,7 @@ sliders = [slide_0, slide_1, slide_2, slide_3]
 def update(val):
     global rk, joint_angles, last_plot, ax
     joint_angles = [slider.val for slider in sliders]
-    joint_pos = rk.joint_pos_geom(joint_angles)
+    joint_pos = rk.joint_pos(joint_angles)
 
     # get collision
     if rk.check_self_collision(joint_angles):
