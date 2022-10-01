@@ -7,7 +7,7 @@ test which moves arm up and done vertically a little
 import time
 import rospy
 from geometry_msgs.msg import Pose, Point
-from joint_controller.definitions import *
+from start_joint_controller.definitions import *
 
 STEP_SIZE = 10   # [mm]
 START_Z = L     # [mm]

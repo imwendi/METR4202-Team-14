@@ -15,6 +15,6 @@ def numpify(msg):
     if isinstance(msg, Point):
         msg = np.array([msg.x, msg.y, msg.z])
     else:
-        msg = None
+        msg = np.array(msg)
 
     return msg

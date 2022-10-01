@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import rospy
 from joint_controller.joint_controller import JointController
 

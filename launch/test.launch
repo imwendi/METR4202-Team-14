@@ -1,0 +1,12 @@
+<launch>
+
+    <!-- run dynamixel interface controller -->
+    <include file="$(find dynamixel_interface)/launch/dynamixel_interface_controller.launch"/>
+
+    <!-- run pose control node -->
+    <node name="pose_node"
+          pkg="joint_controller"
+          type="start_joint_controller.py"
+    />
+
+</launch>
