@@ -3,9 +3,9 @@ from matplotlib.widgets import Slider, Button
 from kinematics.kinematics import RobotKinematics
 from plotter import *
 
-
+base_height = 1.0
 link_lengths = np.array([1, 1, 1, 1])
-rk = RobotKinematics(link_lengths)
+rk = RobotKinematics(base_height, link_lengths)
 
 # setup plot axes
 fig = plt.figure(figsize=(10, 10))

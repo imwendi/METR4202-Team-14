@@ -3,9 +3,9 @@ from matplotlib.widgets import Slider, Button
 from kinematics.kinematics import RobotKinematics
 from plotter import *
 
-
+base_height = 0.5
 link_lengths = np.array([1, 1, 1, 1])
-rk = RobotKinematics(link_lengths)
+rk = RobotKinematics(base_height, link_lengths)
 
 # setup plot axes
 fig = plt.figure(figsize=(10, 10))
@@ -53,7 +53,7 @@ def update(val):
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('z')
-    last_plot = plot_4r_robot(joint_pos, ax)
+    last_plot = plot_4r_robot(joint_pos, ax, surface_range=(-lim, lim))
 
 
 # slider reset button

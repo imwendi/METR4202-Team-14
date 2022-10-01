@@ -11,11 +11,25 @@ class KinematicsBase():
     3R chain formed by links 2-4. We denote the latter's plane as the "3R plane"
 
     """
-    def __init__(self, link_lengths: Union[np.array, List[float]]):
+    def __init__(self,
+                 base_height: float,
+                 link_lengths: Union[np.array, List[float]]):
+        """
+
+
+        Args:
+            base_height: height from ground of first joint
+            link_lengths: lengths of links between joints
+        """
+        self.base_height = base_height
         self.link_lengths = link_lengths
+
+        # computes transformation matrix to 3R plane
+        self.T_3r = lambda theta1:\
+            self.transform_from_3r(base_height + link_lengths[0], theta1)
+
         # space home config.
         self.M = np.eye(4); self.M[2, 3] = np.sum(link_lengths)
-        print(self.M)
         # forward kinematics space screws, as matrix columns
         l0, l1, l2, l3 = self.link_lengths
         self.screws = np.array([[0, 0, 1, 0, 0, 0],
@@ -77,7 +91,7 @@ class KinematicsBase():
         joint_angles = np.zeros((4, 4))
         for i, _theta1 in enumerate(theta1):
             # transformation to 3R plane
-            T = self.transform_from_3r(self.link_lengths[0], _theta1)
+            T = self.T_3r(_theta1)
 
             # end-affector (x, y, phi) position in 3R plane
             p_3r = [*apply_transform(mr.TransInv(T), p)[:2], phi]
@@ -123,11 +137,11 @@ class KinematicsBase():
 
         Returns:
             list of joint coordinates in the stationary plane
-            [p0, p1, p2, p3, p_end], p0 is at the origin
+            [p0, p1, p2, p3, p_end], p0 is at the base
 
         """
         # transformation matrix from 3R to stationary frame
-        T = self.transform_from_3r(self.link_lengths[0], joint_angles[0])
+        T = self.T_3r(joint_angles[0])
 
         # compute joint positions in 3R plane, (2, 4) initially
         pos_3r = np.array(self.joint_pos_3r(self.link_lengths[1:], joint_angles[1:])).T
@@ -139,31 +153,28 @@ class KinematicsBase():
         # convert positions to stationary frame
         pos_3r = apply_transform(T, pos_3r)
 
-        # origin at (0, 0, 0)
-        origin = np.zeros((3, 1))
+        # base at (0, 0, base_height)
+        base = np.array([0, 0, self.base_height]).reshape((3, 1))
 
         # combine positions
-        return np.concatenate([origin, pos_3r], axis=-1)
+        return np.concatenate([base, pos_3r], axis=-1)
 
     # ______________________________ 3R methods ________________________________
     @staticmethod
-    def transform_from_3r(l1, theta1):
+    def transform_from_3r(displacement, theta1):
         """
         Compute transformation to 3R plane
 
         Args:
-            l1: first link length
+            displacement: vertical displacement of first joint from ground
             theta1: first joint angle
 
         Returns:
+            Transformation matrix to 3R plane
 
         """
-        # T1 = mr.RpToTrans(rot(0, 0, theta1), np.array([0, 0, l1]))
-        # T2 = mr.RpToTrans(rot(0, -np.pi/2, 0) @ rot(-np.pi/2, 0, 0), np.zeros(3))
-        #
-        # return T2@T1
 
-        return mr.RpToTrans(rot(-np.pi / 2, -np.pi / 2, theta1), np.array([0, 0, l1]))
+        return mr.RpToTrans(rot(-np.pi / 2, -np.pi / 2, theta1), np.array([0, 0, displacement]))
 
     @staticmethod
     def ik_3r(link_lengths, p):
