@@ -203,6 +203,8 @@ class KinematicsBase():
         # pre-compute trig values
         s_phi, c_phi = np.sin(phi), np.cos(phi)
 
+        print("cos val: ", c_phi)
+
         # compute possible theta2 values
         c_theta2 = (x**2 + y**2 + l3**2 - 2*l3*(c_phi*x + s_phi*y) - l1**2 - l2**2)\
                    / (2*l1*l2)

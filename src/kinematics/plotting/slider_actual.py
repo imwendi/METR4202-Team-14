@@ -2,9 +2,10 @@ import sys
 from matplotlib.widgets import Slider, Button
 from kinematics.kinematics import RobotKinematics
 from plotter import *
+from joint_controller.definitions import *
 
-base_height = 0.5
-link_lengths = np.array([1, 1, 1, 1])
+base_height = BASE_HEIGHT
+link_lengths = LINK_LENGTHS
 rk = RobotKinematics(base_height, link_lengths)
 
 # setup plot axes
@@ -18,11 +19,11 @@ ax_y = plt.axes([0.25, 0.15, 0.65, 0.03])
 ax_z = plt.axes([0.25, 0.1, 0.65, 0.03])
 ax_phi = plt.axes([0.25, 0.05, 0.65, 0.03])
 
-lim = 3.999999
+lim = L
 
 x_slide = Slider(ax_x, 'End-affector x', -lim, lim, 0)
 y_slide = Slider(ax_y, 'End-affector y', -lim, lim, 0)
-z_slide = Slider(ax_z, 'End-affector z', 0, lim, lim/2)
+z_slide = Slider(ax_z, 'End-affector z', L*2/3, lim, lim/2)
 phi_slide = Slider(ax_phi, 'orientation', -np.pi, np.pi, 0)
 
 joint_angles = np.zeros((4, 1))
@@ -46,7 +47,7 @@ def update(val):
         print("\n")
 
     ax.clear()
-    lim = 4
+    lim = L
     ax.set_xlim([-lim, lim])
     ax.set_ylim([-lim, lim])
     ax.set_zlim([-lim, lim])

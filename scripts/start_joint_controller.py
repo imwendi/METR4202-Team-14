@@ -3,7 +3,7 @@
 import rospy
 from joint_controller.joint_controller import JointController
 
-rospy.init_node('pose_test_1')
+rospy.init_node('jointcontroller_node')
 joint_controller = JointController()
 
 if __name__ == '__main__':

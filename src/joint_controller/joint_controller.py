@@ -1,3 +1,5 @@
+import sys
+
 import rospy
 import numpy as np
 
@@ -35,13 +37,13 @@ class JointController():
                                           self._joint_sub_handler)
 
         # desired pose subscriber
-        self.pose_sub =\
-            rospy.Subscriber(NODE_DESIRED_POS, Pose, self._pose_sub_handler)
+        # self.pose_sub =\
+        #     rospy.Subscriber(NODE_DESIRED_POS, Pose, self._pose_sub_handler)
 
         # desired pose array (x, y, z, 3R orientation) subscriber
         self.pose_array_sub = rospy.Subscriber(NODE_DESIRED_POSE4,
                                                Pose4,
-                                               self._pose_array_sub_handler)
+                                               self._pose4_sub_handler)
 
     def publish_joint_angles(self, joint_angles, velocity=None, verbose=True):
         """
@@ -53,7 +55,9 @@ class JointController():
 
         """
         if verbose:
-            print("moving to joint angles ", np.around(np.rad2deg(joint_angles), 3))
+            print("moving to joint angles (rad)", np.around(joint_angles, 3))
+            print("moving to joint angles (deg)", np.around(np.rad2deg(joint_angles), 3))
+            print()
 
         if velocity is None:
             velocity = np.ones(4) * DEFAULT_VELOCITY
@@ -95,10 +99,18 @@ class JointController():
         # create and publish JointState message
         self.publish_joint_angles(new_joint_angles)
 
-    def _pose_array_sub_handler(self, msg: Pose4):
+    def _pose4_sub_handler(self, msg: Pose4):
         position = np.array(msg.position)
+        print(f"moving to position {position}, orientation {msg.orientation} deg\n")
         orientation = np.deg2rad(msg.orientation)
+
         new_joint_angles = self.rk.ik(position, orientation)
+        new_joint_angles = new_joint_angles[:, 1]
+        new_joint_angles[-1] *= -1
+
+        if np.isnan(new_joint_angles).any():
+            print("ignored NaN angles", file=sys.stderr)
+            return
 
         # TODO: change to auto select joint angles
-        self.publish_joint_angles(new_joint_angles[:, 0])
+        self.publish_joint_angles(new_joint_angles, velocity=np.ones(4)*0.25)
