@@ -47,7 +47,9 @@ class RobotKinematics(KinematicsBase):
             selected joint angles, None if no valid solutions are available
 
         """
-        necessary_cond_filters = [self._filter_nan, self._filter_collision]
+        necessary_cond_filters = [self._filter_nan,
+                                  self._filter_collision,
+                                  self._filter_vertical_threshold]
 
         # remove solution columns with NaN values
         ik_solution = self._filter_nan(ik_solution)
@@ -109,8 +111,12 @@ class RobotKinematics(KinematicsBase):
                                for i in range(num_sols)]
         threshold_satisfied_idx = np.full(num_sols, False)
 
-        for i, joint_positions in all_joint_positions:
-            if (joint_positions[:, i] > self.vertical_threshold).all():
+
+        for i, joint_positions in enumerate(all_joint_positions):
+            print(joint_positions)
+
+            # row 2 is z coordinate values
+            if (joint_positions[2, :] > self.vertical_threshold).all():
                 threshold_satisfied_idx[i] = True
 
         return ik_solutions[:, threshold_satisfied_idx]
