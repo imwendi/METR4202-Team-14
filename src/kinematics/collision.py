@@ -6,7 +6,7 @@ import numpy as np
 
 def intersect_connected_segments(points=List[np.array],
                                  verbose=True,
-                                 skip_consecutive=True):
+                                 skip_consecutive=False):
     """
     #TODO: pretty inefficient, very O(n^2)
 
@@ -26,16 +26,20 @@ def intersect_connected_segments(points=List[np.array],
     # list conversion is necessary, otherwise double iteration over zip doesn't work
     line_segments = list(zip(points[:-1], points[1:]))
 
+    # TODO: do we need this?
     num_segments = len(line_segments)
     for i in range(num_segments):
         a1, b1 = line_segments[i]
         # skip consecutive
-        for j in range(i + 1 if skip_consecutive else 0, num_segments):
+        for j in range(i + (2 if skip_consecutive else 1), num_segments):
             a2, b2 = line_segments[j]
 
-            if i == j:
-                # same line
-                continue
+    # todo: is this needed?
+    # for i, (a1, b1) in enumerate(line_segments):
+    #     for j, (a2, b2) in enumerate(line_segments):
+    #         if i == j:
+    #             # same line
+    #             continue
 
             if intersect_2_segments(a1, a2, b1, b2):
                 # break and return on intersection found
@@ -77,10 +81,12 @@ def intersect_2_segments(a1, a2, b1, b2):
 
     if parallel:
         if colinear:
+            # TODO: check this!!
             # check if co-linear lines intersect
             t1 = np.dot(a2 - a1, v1) / np.dot(v1, v1)
             t2 = t1 + np.dot(v2, v1) / np.dot(v1, v1)
-            intersecting = 0 < (t2 - t1) < 1
+            print(t2 - t1)
+            intersecting = 0 < np.abs(t2 - t1) < 1
         # else parallel, not co-linear cannot intersect
 
         return intersecting

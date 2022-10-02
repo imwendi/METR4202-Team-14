@@ -22,7 +22,7 @@ ax_phi = plt.axes([0.25, 0.05, 0.65, 0.03])
 lim = L + base_height
 x_slide = Slider(ax_x, 'End-affector x', -lim, lim, 0)
 y_slide = Slider(ax_y, 'End-affector y', -lim, lim, 0)
-z_slide = Slider(ax_z, 'End-affector z', 0, lim, lim*2/3)
+z_slide = Slider(ax_z, 'End-affector z', 0, lim, lim)
 phi_slide = Slider(ax_phi, 'orientation', -180, 180, 0)
 
 JOINT_ANGLES_IDX = 3
@@ -48,12 +48,13 @@ def update(val):
 
     joint_angles = possible_joint_angles[:, JOINT_ANGLES_IDX]
     joint_pos = rk.joint_pos(joint_angles)
+    print('joint_pos ', np.around(joint_pos, 3))
 
     # get collision
-    if rk.check_self_collision(joint_angles):
+    if rk.check_self_collision(joint_angles, verbose=True):
         print("Collision!!!", file=sys.stderr)
     else:
-        print("\n")
+        print("No collision")
 
     ax.clear()
     ax.set_xlim([-lim, lim])

@@ -20,10 +20,10 @@ ax_y = plt.axes([0.25, 0.15, 0.65, 0.03])
 ax_z = plt.axes([0.25, 0.1, 0.65, 0.03])
 ax_phi = plt.axes([0.25, 0.05, 0.65, 0.03])
 
-lim = 3.999999
+lim = base_height + np.sum(link_lengths)
 
-#INIT = [0, 0, lim/2, 0]
-INIT = [1.827, 0, 0.824, -128.06]
+INIT = [0, 0, 5, 0]
+#INIT = [1.827, 0, 0.824, -128.06]
 x_slide = Slider(ax_x, 'End-affector x', -lim, lim, INIT[0])
 y_slide = Slider(ax_y, 'End-affector y', -lim, lim, INIT[1])
 z_slide = Slider(ax_z, 'End-affector z', 0, lim, INIT[2])
@@ -41,22 +41,23 @@ def update(val):
     phi = np.deg2rad(phi_slide.val)
 
     possible_joint_angles = rk.ik(np.array([x, y, z]), phi)
-    for i in range(4):
-        joint_angles = possible_joint_angles[:, i]
-        pos = np.around(rk.joint_pos(joint_angles), 3)
-        deg_angles = np.around(np.rad2deg((joint_angles)), 3)
-
-        print(f"Option {i}\nPos:{pos}\nJoint Angles:{deg_angles}\n")
-    print('_'*80)
+    # for i in range(4):
+    #     joint_angles = possible_joint_angles[:, i]
+    #     pos = np.around(rk.joint_pos(joint_angles), 3)
+    #     deg_angles = np.around(np.rad2deg((joint_angles)), 3)
+    #
+    #     print(f"Option {i}\nPos:{pos}\nJoint Angles:{deg_angles}\n")
+    # print('_'*80)
 
     joint_angles = possible_joint_angles[:, JOINT_ANGLES_IDX]
     joint_pos = rk.joint_pos(joint_angles)
+    print('joint_pos ', np.around(joint_pos, 3))
 
     # get collision
-    if rk.check_self_collision(joint_angles):
+    if rk.check_self_collision(joint_angles, verbose=True, skip_consecutive=False):
         print("Collision!!!", file=sys.stderr)
     else:
-        print("\n")
+        print("No collision")
 
     ax.clear()
     lim = 4

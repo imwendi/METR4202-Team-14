@@ -52,10 +52,10 @@ def update(val):
         print("No valid joint angles")
     else:
         joint_pos = rk.joint_pos(joint_angles)
-        print('joint angles ', joint_angles)
-
         # get collision
-        if rk.check_self_collision(joint_angles):
+        if rk.check_self_collision(joint_angles,
+                                   verbose=False,
+                                   skip_consecutive=False):
             print("Collision!!!", file=sys.stderr)
         else:
             print("No collision.")

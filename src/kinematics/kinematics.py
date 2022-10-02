@@ -47,7 +47,7 @@ class RobotKinematics(KinematicsBase):
             selected joint angles, None if no valid solutions are available
 
         """
-        necessary_cond_filters = [self._filter_nan]
+        necessary_cond_filters = [self._filter_nan, self._filter_collision]
 
         # remove solution columns with NaN values
         ik_solution = self._filter_nan(ik_solution)
@@ -59,8 +59,6 @@ class RobotKinematics(KinematicsBase):
             if ik_solution.shape[1] == 0:
                 print(f'failed on {filter.__name__}')
                 return None
-
-        print('length', len(ik_solution))
 
         return ik_solution[:, 0]
 
@@ -117,12 +115,13 @@ class RobotKinematics(KinematicsBase):
 
         return ik_solutions[:, threshold_satisfied_idx]
 
-    def check_self_collision(self, joint_angles, verbose=False):
+    def check_self_collision(self, joint_angles, **kwargs):
         """
         Checks if a set of joint angles will result in self collisions
 
         Args:
             joint_angles: joint angles
+            **kwargs: kwargs to pass into intersect_connected_segments
 
         Returns:
             True if a collision will occur, else False
@@ -134,7 +133,7 @@ class RobotKinematics(KinematicsBase):
 
         joint_pos = self.get_planar_joint_pos(joint_angles)
 
-        return intersect_connected_segments(joint_pos, verbose=verbose)
+        return intersect_connected_segments(joint_pos, **kwargs)
 
     def get_planar_joint_pos(self, joint_angles):
         """
