@@ -5,9 +5,9 @@ from kinematics.kinematics_base import KinematicsBase
 from kinematics.collision import intersect_connected_segments
 from plotter import *
 
-
+base_height = 1
 link_lengths = np.array([1, 1, 1, 1])
-rk = KinematicsBase(link_lengths)
+rk = KinematicsBase(1, link_lengths)
 
 # setup plot axes
 fig, ax = plt.subplots()
