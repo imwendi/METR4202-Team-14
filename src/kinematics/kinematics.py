@@ -22,22 +22,50 @@ class RobotKinematics(KinematicsBase):
         super().__init__(*args, **kwargs)
         self.vertical_threshold = vertical_threshold
 
-    # ________________________ Joint angles selection __________________________
-
-    def pick_joint_angles(self, ik_solution):
+    def pick_highest_joint_2(self, ik_solution):
         """
-        Computes selects joint angle combination from inverse kinematics solutions
-        which best satisfy the following criteria.
 
-        Necessary conditions for valid solutions:
-            - No NaN values (occurs when an IK solution isn't valid)
+        Args:
+            ik_solution: inversion kinematics solution
 
-            - No joint positions causing self-collisions
-                            (line intersections of links)
-            - No joint positions have vertical (z) value below the vertical threshold
+        Returns:
 
-        Sorting conditions with which to prioritise valid solutions:
-            - Greatest joint 2 vertical (z) value
+        """
+        ik_joint_positions = self.get_ik_joint_positions(ik_solution)
+        print(ik_joint_positions.shape)
+        # second last joint at 4
+        target_idx = np.argmax(ik_joint_positions[2, 2, :])
+
+        return ik_solution[:, target_idx]
+
+    def get_ik_joint_positions(self, ik_solution):
+        """
+
+        Args:
+            ik_solution: inverse kinematics solution
+
+        Returns:
+            3d array of joint positions, dimensions are:
+             ([x, y, z] coordinate, joint number, joint angle combinations)
+
+        """
+        num_sols = ik_solution.shape[1]
+
+        return np.array([self.joint_pos(ik_solution[:, i])
+                         for i in range(num_sols)]).reshape((3, -1, num_sols))
+
+    # _____________________________ IK Filtering _______________________________
+
+    def filter_ik_solution(self, ik_solution):
+        """
+        Filters inverse kinematics solutions for joint angle combintations
+        which satisfy the following necessary conditions:
+
+        - No NaN values (occurs when an IK solution isn't valid)
+
+        - No joint positions causing self-collisions
+                        (line intersections of links)
+        - No joint positions have vertical (z) value below the vertical threshold
 
         Args:
             ik_solution: inverse kinematics solutions from:
@@ -62,7 +90,7 @@ class RobotKinematics(KinematicsBase):
                 print(f'failed on {filter.__name__}')
                 return None
 
-        return ik_solution[:, 0]
+        return ik_solution
 
     def _filter_nan(self, ik_solutions: np.array) -> np.array:
         """

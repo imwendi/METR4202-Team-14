@@ -25,7 +25,7 @@ y_slide = Slider(ax_y, 'End-affector y', -lim, lim, 0)
 z_slide = Slider(ax_z, 'End-affector z', 0, lim, lim)
 phi_slide = Slider(ax_phi, 'orientation', -180, 180, 0)
 
-JOINT_ANGLES_IDX = 3
+JOINT_ANGLES_IDX = 1
 ik_solution = np.zeros((4, 1))
 
 
