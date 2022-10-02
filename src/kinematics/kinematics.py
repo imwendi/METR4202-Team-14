@@ -8,7 +8,25 @@ class RobotKinematics(KinematicsBase):
     Subclass of KinematicsBase with added collision computation
 
     """
-    def check_self_collision(self, joint_angles):
+    def ik_best_choice(self):
+        """
+        Computes inverse kinematics and selects joint angle combination which
+        best satisfies the following criteria:
+
+
+        Args:
+            p: desired end-affector position (x, y, z)
+            phi: desired 3R orientation TODO: replace this with something better
+
+        Returns:
+            possible joint angles to get to p
+
+        """
+        pass
+
+    # _____________________ Joint angle criteria helpers _______________________
+
+    def check_self_collision(self, joint_angles, verbose=False):
         """
         Checks if a set of joint angles will result in self collisions
 
@@ -25,7 +43,7 @@ class RobotKinematics(KinematicsBase):
 
         joint_pos = self.get_planar_joint_pos(joint_angles)
 
-        return intersect_connected_segments(joint_pos)
+        return intersect_connected_segments(joint_pos, verbose=verbose)
 
     def get_planar_joint_pos(self, joint_angles):
         """
@@ -36,15 +54,16 @@ class RobotKinematics(KinematicsBase):
             joint_angles: 3R chain joint angles (excludes first joint)
 
         Returns:
-            list of joint coordinates in the 3R plane
-            [p0, p1, p2, p3, p_end], p0 is at the origin
+            list of coordinates (ground + joints) in the 3R plane
+            [ground, p0, p1, p2, p3, p_end], p0 is at the origin
 
         """
-        p0 = np.zeros(2)
+        ground = np.zeros(2)
         joint_pos = self.joint_pos_3r(self.link_lengths[1:], joint_angles)
+        p0 = np.array([self.base_height, 0])
         # shift [p1, p2, p3, p_end] relative to p0
-        offset = np.array([self.link_lengths[0], 0])
+        offset = np.array([self.link_lengths[0], 0]) + p0
         for i, pos in enumerate(joint_pos):
             joint_pos[i] = pos + offset
 
-        return [p0] + joint_pos
+        return [ground, p0] + joint_pos

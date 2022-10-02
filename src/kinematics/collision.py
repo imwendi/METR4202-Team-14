@@ -1,9 +1,10 @@
+import copy
 from typing import List
 
 import numpy as np
 
 
-def intersect_connected_segments(points=List[np.array]):
+def intersect_connected_segments(points=List[np.array], verbose=True):
     """
     #TODO: pretty inefficient, very O(n^2)
 
@@ -18,15 +19,24 @@ def intersect_connected_segments(points=List[np.array]):
         intersect.
 
     """
-    line_segments = zip(points[:-1], points[1:])
+    # list conversion is necessary, otherwise double iteration over zip doesn't work
+    line_segments = list(zip(points[:-1], points[1:]))
     for i, (a1, b1) in enumerate(line_segments):
         for j, (a2, b2) in enumerate(line_segments):
+            # TODO: remove these debugging prints!
+            # print(f"(a1, b1): ({a1}, {b1})")
+            # print(f"(a2, b2): ({a2}, {b2})")
+            # print()
+
             if i == j:
                 # same line
                 continue
 
             if intersect_2_segments(a1, a2, b1, b2):
                 # break and return on intersection found
+                if verbose:
+                    print(f"collision between ({a1} -> {b1}) and ({a2} -> {b2})")
+
                 return True
 
     return False
@@ -65,7 +75,7 @@ def intersect_2_segments(a1, a2, b1, b2):
             # check if co-linear lines intersect
             t1 = np.dot(a2 - a1, v1) / np.dot(v1, v1)
             t2 = t1 + np.dot(v2, v1) / np.dot(v1, v1)
-            intersecting = 0 <= (t2 - t1) <= 1
+            intersecting = 0 < (t2 - t1) < 1
         # else parallel, not co-linear cannot intersect
 
         return intersecting

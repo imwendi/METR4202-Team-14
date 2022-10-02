@@ -32,17 +32,7 @@ def update(val):
     x, y, z = get_radial_point(r_slide.val, theta_slide.val, z_slide.val)
     phi = phi_slide.val
 
-    joint_angles = rk.ik(np.array([x, y, z]), phi)
-    for i in range(4):
-        # check for collisions
-        _joint_angles = joint_angles[:, i]
-        if not rk.check_self_collision(_joint_angles):
-            joint_pos = rk.joint_pos(_joint_angles)
-            for _joint_pos in joint_pos:
-                if _joint_pos[-1] <= z:
-                    continue
-            joint_angles = _joint_angles
-            break
+    joint_angles = rk.ik(np.array([x, y, z]), phi)[:, 2]
 
     #print(joint_angles)
     joint_pos = rk.joint_pos(joint_angles)

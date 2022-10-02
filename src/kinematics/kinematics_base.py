@@ -39,28 +39,28 @@ class KinematicsBase():
                                 [1, 0, 0, 0, l0+l1+l2, 0],
                                 [1, 0, 0, 0, l0+l1+l2+l3, 0]]).T
 
-    def ik_closest_norm(self, p, phi, thetas):
-        """
-        TODO: depreciated?
-
-        Computes inverse kinematics and selects pos closest (least l1 norm)
-        from a given current pos.
-
-        Args:
-            p: desired end-affector position (x, y, z)
-            phi: desired orientation in 3R plane TODO: for testing only
-            thetas: current joint angles
-
-        Returns:
-            new optimal pos
-
-        """
-        new_joint_angles = self.ik(p, phi)
-
-        norm_val = np.linalg.norm(new_joint_angles - thetas.reshape((4, 1)))
-        pose_idx = np.argmin(norm_val, axis=-1)
-
-        return new_joint_angles[:, pose_idx]
+    # def ik_closest_norm(self, p, phi, thetas):
+    #     """
+    #     TODO: depreciated?
+    #
+    #     Computes inverse kinematics and selects pos closest (least l1 norm)
+    #     from a given current pos.
+    #
+    #     Args:
+    #         p: desired end-affector position (x, y, z)
+    #         phi: desired orientation in 3R plane TODO: for testing only
+    #         thetas: current joint angles
+    #
+    #     Returns:
+    #         new optimal pos
+    #
+    #     """
+    #     new_joint_angles = self.ik(p, phi)
+    #
+    #     norm_val = np.linalg.norm(new_joint_angles - thetas.reshape((4, 1)))
+    #     pose_idx = np.argmin(norm_val, axis=-1)
+    #
+    #     return new_joint_angles[:, pose_idx]
 
     def fk(self, joint_angles) -> np.array:
         """

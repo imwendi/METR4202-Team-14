@@ -31,4 +31,3 @@ if __name__ == '__main__':
     a2 = np.array([1, 1])
     b2 = np.array([1, 5])
     print(intersect_2_segments(a1, a2, b1, b2))
-

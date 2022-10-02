@@ -35,10 +35,10 @@ def update(val):
     joint_pos = rk.joint_pos_3r(link_lengths[1:], joint_angles)
 
     # get collision
-    if intersect_connected_segments(joint_pos):
+    if intersect_connected_segments(joint_pos, verbose=False):
         print("Collision!!!", file=sys.stderr)
     else:
-        print("\n")
+        print("no collision \n")
 
     ax.clear()
     lim = 4
