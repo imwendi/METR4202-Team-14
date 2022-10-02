@@ -25,11 +25,11 @@ slide_1 = Slider(ax1, 'joint angle 1', -np.pi, np.pi, 0)
 slide_2 = Slider(ax2, 'joint angle 3', -np.pi, np.pi, 0)
 slide_3 = Slider(ax3, 'joint angle 4', -np.pi, np.pi, 0)
 
-joint_angles = np.zeros((4, 1))
+possible_joint_angles = np.zeros((4, 1))
 sliders = [slide_0, slide_1, slide_2, slide_3]
 
 def update(val):
-    global rk, joint_angles, last_plot, ax
+    global rk, possible_joint_angles, last_plot, ax
     joint_angles = [slider.val for slider in sliders]
     joint_pos = rk.joint_pos(joint_angles)
 

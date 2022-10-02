@@ -26,9 +26,9 @@ theta_slide = Slider(ax_theta, 'Direction', -np.pi, np.pi, 0)
 z_slide = Slider(ax_z, 'Height', 0, lim, 0.7)
 phi_slide = Slider(ax_phi, 'Orientation', -np.pi, np.pi, np.pi*3/4)
 
-joint_angles = np.zeros((4, 1))
+possible_joint_angles = np.zeros((4, 1))
 def update(val):
-    global rk, joint_angles, last_plot, ax
+    global rk, possible_joint_angles, last_plot, ax
     x, y, z = get_radial_point(r_slide.val, theta_slide.val, z_slide.val)
     phi = phi_slide.val
 
