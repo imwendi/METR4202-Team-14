@@ -24,13 +24,13 @@ def intersect_connected_segments(points=List[np.array], verbose=True):
     for i, (a1, b1) in enumerate(line_segments):
         for j, (a2, b2) in enumerate(line_segments):
             # TODO: remove these debugging prints!
-            # print(f"(a1, b1): ({a1}, {b1})")
-            # print(f"(a2, b2): ({a2}, {b2})")
-            # print()
-
             if i == j:
                 # same line
                 continue
+
+            print(f"(a1, b1): ({a1}, {b1})")
+            print(f"(a2, b2): ({a2}, {b2})")
+            print()
 
             if intersect_2_segments(a1, a2, b1, b2):
                 # break and return on intersection found

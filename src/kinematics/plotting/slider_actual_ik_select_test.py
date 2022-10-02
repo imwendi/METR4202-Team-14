@@ -1,12 +1,11 @@
 import sys
-
-import numpy as np
 from matplotlib.widgets import Slider, Button
 from kinematics.kinematics import RobotKinematics
 from plotter import *
+from joint_controller.definitions import *
 
-base_height = 0.5
-link_lengths = np.array([1, 1, 1, 1])
+base_height = BASE_HEIGHT
+link_lengths = LINK_LENGTHS
 rk = RobotKinematics(base_height, link_lengths)
 
 # setup plot axes
@@ -20,14 +19,11 @@ ax_y = plt.axes([0.25, 0.15, 0.65, 0.03])
 ax_z = plt.axes([0.25, 0.1, 0.65, 0.03])
 ax_phi = plt.axes([0.25, 0.05, 0.65, 0.03])
 
-lim = 3.999999
-
-#INIT = [0, 0, lim/2, 0]
-INIT = [1.827, 0, 0.824, -128.06]
-x_slide = Slider(ax_x, 'End-affector x', -lim, lim, INIT[0])
-y_slide = Slider(ax_y, 'End-affector y', -lim, lim, INIT[1])
-z_slide = Slider(ax_z, 'End-affector z', 0, lim, INIT[2])
-phi_slide = Slider(ax_phi, 'orientation', -180, 180, INIT[3])
+lim = L + base_height
+x_slide = Slider(ax_x, 'End-affector x', -lim, lim, 0)
+y_slide = Slider(ax_y, 'End-affector y', -lim, lim, 0)
+z_slide = Slider(ax_z, 'End-affector z', 0, lim, lim*2/3)
+phi_slide = Slider(ax_phi, 'orientation', -180, 180, 0)
 
 JOINT_ANGLES_IDX = 3
 ik_solution = np.zeros((4, 1))
@@ -40,33 +36,38 @@ def update(val):
     z = z_slide.val
     phi = np.deg2rad(phi_slide.val)
 
-    possible_joint_angles = rk.ik(np.array([x, y, z]), phi)
-    for i in range(4):
-        joint_angles = possible_joint_angles[:, i]
-        pos = np.around(rk.joint_pos(joint_angles), 3)
-        deg_angles = np.around(np.rad2deg((joint_angles)), 3)
+    ik_solution = rk.ik(np.array([x, y, z]), phi)
+    # uncomment to print options!!
+    # for i in range(4):
+    #     joint_angles = possible_joint_angles[:, i]
+    #     pos = np.around(rk.joint_pos(joint_angles), 3)
+    #     deg_angles = np.around(np.rad2deg((joint_angles)), 3)
+    #
+    #     print(f"Option {i}\nPos:{pos}\nJoint Angles:{deg_angles}\n")
+    # print('_'*80)
 
-        print(f"Option {i}\nPos:{pos}\nJoint Angles:{deg_angles}\n")
-    print('_'*80)
+    joint_angles = rk.pick_joint_angles(ik_solution)
 
-    joint_angles = possible_joint_angles[:, JOINT_ANGLES_IDX]
-    joint_pos = rk.joint_pos(joint_angles)
-
-    # get collision
-    if rk.check_self_collision(joint_angles):
-        print("Collision!!!", file=sys.stderr)
+    if joint_angles is None:
+        print("No valid joint angles")
     else:
-        print("\n")
+        joint_pos = rk.joint_pos(joint_angles)
+        print('joint angles ', joint_angles)
 
-    ax.clear()
-    lim = 4
-    ax.set_xlim([-lim, lim])
-    ax.set_ylim([-lim, lim])
-    ax.set_zlim([-lim, lim])
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
-    last_plot = plot_4r_robot(joint_pos, ax, surface_range=(-lim, lim))
+        # get collision
+        if rk.check_self_collision(joint_angles):
+            print("Collision!!!", file=sys.stderr)
+        else:
+            print("No collision.")
+
+        ax.clear()
+        ax.set_xlim([-lim, lim])
+        ax.set_ylim([-lim, lim])
+        ax.set_zlim([-lim, lim])
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_zlabel('z')
+        last_plot = plot_4r_robot(joint_pos, ax, surface_range=(-lim, lim))
 
 
 # joint angle idx button

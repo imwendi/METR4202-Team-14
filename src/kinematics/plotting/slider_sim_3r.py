@@ -23,7 +23,7 @@ y_slide = Slider(ax_y, 'End-affector y', -lim, lim, 0)
 phi_slide = Slider(ax_phi, 'orientation', -np.pi, np.pi, 0)
 
 def update(val):
-    global possible_joint_angles, last_plot, ax
+    global ik_solution, last_plot, ax
     x = x_slide.val
     y = y_slide.val
     phi = phi_slide.val
@@ -57,7 +57,7 @@ def reset(event):
     phi_slide.reset()
 button.on_clicked(reset)
 
-possible_joint_angles = np.zeros((3, 1))
+ik_solution = np.zeros((3, 1))
 
 
 if __name__ == '__main__':

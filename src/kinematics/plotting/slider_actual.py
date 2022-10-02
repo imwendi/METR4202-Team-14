@@ -26,11 +26,11 @@ z_slide = Slider(ax_z, 'End-affector z', 0, lim, lim*2/3)
 phi_slide = Slider(ax_phi, 'orientation', -180, 180, 0)
 
 JOINT_ANGLES_IDX = 3
-possible_joint_angles = np.zeros((4, 1))
+ik_solution = np.zeros((4, 1))
 
 
 def update(val):
-    global rk, possible_joint_angles, last_plot, ax
+    global rk, ik_solution, last_plot, ax
     x = x_slide.val
     y = y_slide.val
     z = z_slide.val
