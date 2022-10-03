@@ -103,19 +103,24 @@ class JointController():
         self.publish_joint_angles(new_joint_angles)
 
     def _pose4_sub_handler(self, msg: Pose4):
+        print('msg.position ', msg.position)
         position = np.array(msg.position)
-        print(f"moving to position {position}, orientation {msg.orientation} deg\n")
-        orientation = np.deg2rad(msg.orientation)
+        print(f"moving to position {position}, orientation {np.deg2rad(msg.orientation)} deg\n")
+        orientation = msg.orientation
 
         # compute ik solutions
-        ik_solutions = self.rk.ik(position, orientation)
+        ik_solution = self.rk.ik(position, orientation)
 
         # filter out invalid solutions
-        ik_solutions = self.rk.filter_ik_solution(ik_solutions)
+        ik_solution = self.rk.filter_ik_solution(ik_solution)
+
+        if ik_solution is None:
+            print("No valid IK solutions for this config!", file=sys.stderr)
+            return
 
         # select optimal solution
         # TODO: in future, this will be replaced by object collision avoidance things
-        joint_angles = self.rk.pick_highest_joint_2(ik_solutions)
+        joint_angles = self.rk.pick_highest_joint_2(ik_solution)
 
         # TODO: don't need this check anymore?
         if np.isnan(joint_angles).any():

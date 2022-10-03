@@ -33,8 +33,10 @@ class RobotKinematics(KinematicsBase):
         """
         # joint positions (joint angle combination, [x, y, z] coordinate, joint number)
         ik_joint_positions = self.get_ik_joint_positions(ik_solution)
+
         # second last joint at idx 2, z axis is at idx 2
-        target_idx = np.argmax(ik_joint_positions[:, 2, 2])
+        # nanargmax ignores NaN values
+        target_idx = np.nanargmax(ik_joint_positions[:, 2, 2])
 
         return ik_solution[:, target_idx]
 
@@ -117,7 +119,7 @@ class RobotKinematics(KinematicsBase):
             self-collision removed
         """
         num_sols = ik_solutions.shape[1]
-        collision_idx = [self.check_self_collision(ik_solutions[:, i])
+        collision_idx = [self.check_self_collision(ik_solutions[:, i], verbose=True, skip_consecutive=True)
                          for i in range(num_sols)]
         ik_solutions = np.delete(ik_solutions, collision_idx, axis=1)
 
@@ -141,8 +143,6 @@ class RobotKinematics(KinematicsBase):
 
 
         for i, joint_positions in enumerate(all_joint_positions):
-            print(joint_positions)
-
             # row 2 is z coordinate values
             if (joint_positions[2, :] > self.vertical_threshold).all():
                 threshold_satisfied_idx[i] = True

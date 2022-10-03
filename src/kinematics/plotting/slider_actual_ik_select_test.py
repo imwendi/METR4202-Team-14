@@ -4,7 +4,8 @@ from kinematics.kinematics import RobotKinematics
 from plotter import *
 from joint_controller.definitions import *
 
-CONFIG = [182.2, 200.0, 61.8, 99.1]
+#CONFIG = [-182.2, 200.0, 150, 99.1]
+CONFIG = [0, 0, 425, 0]
 
 base_height = BASE_HEIGHT
 link_lengths = LINK_LENGTHS
@@ -39,8 +40,12 @@ def update(val):
     phi = np.deg2rad(phi_slide.val)
 
     ik_solution = rk.ik(np.array([x, y, z]), phi)
+
+    print('ik solution ', ik_solution)
+
     ik_solution = rk.filter_ik_solution(ik_solution)
     joint_angles = rk.pick_highest_joint_2(ik_solution)
+    print('joint angles ', joint_angles)
 
     if joint_angles is None:
         print("No valid joint angles")
