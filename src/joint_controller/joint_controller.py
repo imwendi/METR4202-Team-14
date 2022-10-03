@@ -37,8 +37,8 @@ class JointController():
                                           self._joint_sub_handler)
 
         # desired pose subscriber
-        # self.pose_sub =\
-        #     rospy.Subscriber(NODE_DESIRED_POS, Pose, self._pose_sub_handler)
+        self.pose_sub =\
+            rospy.Subscriber(NODE_DESIRED_POS, Pose, self._pose_sub_handler)
 
         # desired pose array (x, y, z, 3R orientation) subscriber
         self.pose_array_sub = rospy.Subscriber(NODE_DESIRED_POSE4,
@@ -89,18 +89,17 @@ class JointController():
         self.joint_state = joint_state
 
     def _pose_sub_handler(self, pose: Pose):
-        #TODO: depreciated?
         desired_position = numpify(pose.position)
-        phi = 0 # TODO: for testing only!
+        joint_angles, orientation = self.rk.pick_pose_from_position(desired_position)
 
-        print("desired pos is ", desired_position)
+        if joint_angles is None:
+            print("invalid possible")
+            return
 
-        # todo: change to autoselect joint angles
-        new_joint_angles =\
-            self.rk.ik(desired_position, phi)[:, 3]
+        print('chosen orientation %.3f deg' % np.rad2deg(orientation))
 
         # create and publish JointState message
-        self.publish_joint_angles(new_joint_angles)
+        self.publish_joint_angles(joint_angles)
 
     def _pose4_sub_handler(self, msg: Pose4):
         print('msg.position ', msg.position)
