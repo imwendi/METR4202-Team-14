@@ -22,6 +22,42 @@ class RobotKinematics(KinematicsBase):
         super().__init__(*args, **kwargs)
         self.vertical_threshold = vertical_threshold
 
+    def pick_pose_from_position(self, position, intervals=30):
+        """
+        Given desired end-affector position (x, y, z), computes valid orientation
+        and valid joint angles to reach that position.
+
+        Args:
+            position: end-affector position
+
+        Returns:
+            joint_angles: chosen joint angles or None to position cannot be reached
+            chosen_orientation: chosen 3R planar orientation angle
+
+        """
+        joint_angles = None
+        chosen_orientation = None
+
+        orientation_options = np.concatenate([np.linspace(150, 180, intervals//2),
+                                              np.linspace(0, 150, intervals//2)])
+        orientation_options = np.deg2rad(orientation_options)
+
+        # TODO: delete print
+        #print(orientation_options.shape)
+        for i, orientation in enumerate(orientation_options):
+            print(i)
+            ik_solutions = self.ik(position, orientation)
+            ik_solutions = self.filter_ik_solution(ik_solutions)
+
+            if ik_solutions is None:
+                continue
+            else:
+                joint_angles = self.pick_highest_joint_2(ik_solutions)
+                chosen_orientation = orientation
+                break
+
+        return joint_angles, chosen_orientation
+
     def pick_highest_joint_2(self, ik_solution):
         """
 
