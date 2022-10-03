@@ -4,6 +4,8 @@ from kinematics.kinematics import RobotKinematics
 from plotter import *
 from joint_controller.definitions import *
 
+CONFIG = [182.2, 200.0, 61.8, 99.1]
+
 base_height = BASE_HEIGHT
 link_lengths = LINK_LENGTHS
 rk = RobotKinematics(base_height, link_lengths)
@@ -20,10 +22,10 @@ ax_z = plt.axes([0.25, 0.1, 0.65, 0.03])
 ax_phi = plt.axes([0.25, 0.05, 0.65, 0.03])
 
 lim = L + base_height
-x_slide = Slider(ax_x, 'End-affector x', -lim, lim, 214.2)
-y_slide = Slider(ax_y, 'End-affector y', -lim, lim, 0)
-z_slide = Slider(ax_z, 'End-affector z', 0, lim, 100.4)
-phi_slide = Slider(ax_phi, 'orientation', -180, 180, 121.5)
+x_slide = Slider(ax_x, 'End-affector x', -lim, lim, CONFIG[0])
+y_slide = Slider(ax_y, 'End-affector y', -lim, lim, CONFIG[1])
+z_slide = Slider(ax_z, 'End-affector z', 0, lim, CONFIG[2])
+phi_slide = Slider(ax_phi, 'orientation', -180, 180, CONFIG[3])
 
 JOINT_ANGLES_IDX = 3
 ik_solution = np.zeros((4, 1))

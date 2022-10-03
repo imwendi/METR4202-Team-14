@@ -54,6 +54,8 @@ class JointController():
             velocity: array of per joint angular velocities [rad/s]
 
         """
+        joint_angles *= DIRECTIONAL_MULTIPLIERS
+
         if verbose:
             print("moving to joint angles (rad)", np.around(joint_angles, 3))
             print("moving to joint angles (deg)", np.around(np.rad2deg(joint_angles), 3))
@@ -87,6 +89,7 @@ class JointController():
         self.joint_state = joint_state
 
     def _pose_sub_handler(self, pose: Pose):
+        #TODO: depreciated?
         desired_position = numpify(pose.position)
         phi = 0 # TODO: for testing only!
 
@@ -104,13 +107,20 @@ class JointController():
         print(f"moving to position {position}, orientation {msg.orientation} deg\n")
         orientation = np.deg2rad(msg.orientation)
 
-        new_joint_angles = self.rk.ik(position, orientation)
-        new_joint_angles = new_joint_angles[:, 1]
-        new_joint_angles[-1] *= -1
+        # compute ik solutions
+        ik_solutions = self.rk.ik(position, orientation)
 
-        if np.isnan(new_joint_angles).any():
+        # filter out invalid solutions
+        ik_solutions = self.rk.filter_ik_solution(ik_solutions)
+
+        # select optimal solution
+        # TODO: in future, this will be replaced by object collision avoidance things
+        joint_angles = self.rk.pick_highest_joint_2(ik_solutions)
+
+        # TODO: don't need this check anymore?
+        if np.isnan(joint_angles).any():
             print("ignored NaN angles", file=sys.stderr)
             return
 
         # TODO: change to auto select joint angles
-        self.publish_joint_angles(new_joint_angles, velocity=np.ones(4)*0.25)
+        self.publish_joint_angles(joint_angles, velocity=np.ones(4)*0.25)
