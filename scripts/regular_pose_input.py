@@ -24,14 +24,14 @@ pose_pub = rospy.Publisher(NODE_DESIRED_POS, Pose, queue_size=10)
 def input_handler(user_in: str):
     data = user_in.split(' ')
 
-    print(data)
-
     if len(data) != 3:
-        print("expected 'x y z", file=sys.stderr)
+        print("expected x y z", file=sys.stderr)
         return
 
     data = [float(val) for val in data]
     position = np.array(data)
+
+    print(f'position', position)
 
     msg = Pose(Point(*position), Quaternion(0, 0, 0, 0))
 

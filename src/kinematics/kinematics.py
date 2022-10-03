@@ -3,7 +3,7 @@ from typing import Union
 import numpy as np
 from kinematics.kinematics_base import KinematicsBase
 from kinematics.collision import intersect_connected_segments
-
+from joint_controller.definitions import *
 
 class RobotKinematics(KinematicsBase):
     """
@@ -22,7 +22,7 @@ class RobotKinematics(KinematicsBase):
         super().__init__(*args, **kwargs)
         self.vertical_threshold = vertical_threshold
 
-    def pick_pose_from_position(self, position, intervals=30):
+    def pick_pose_from_position(self, position, intervals=50):
         """
         Given desired end-affector position (x, y, z), computes valid orientation
         and valid joint angles to reach that position.
@@ -38,8 +38,8 @@ class RobotKinematics(KinematicsBase):
         joint_angles = None
         chosen_orientation = None
 
-        orientation_options = np.concatenate([np.linspace(150, 180, intervals//2),
-                                              np.linspace(0, 150, intervals//2)])
+        orientation_options = np.concatenate([np.linspace(120, 140, intervals//2),
+                                              np.linspace(0, 120, intervals//2)])
         orientation_options = np.deg2rad(orientation_options)
 
         # TODO: delete print
@@ -114,6 +114,7 @@ class RobotKinematics(KinematicsBase):
 
         """
         necessary_cond_filters = [self._filter_nan,
+                                  self._filter_dynamixel_limits,
                                   self._filter_collision,
                                   self._filter_vertical_threshold]
 
@@ -142,6 +143,33 @@ class RobotKinematics(KinematicsBase):
         """
         nan_idx = np.isnan(ik_solutions).any(axis=0)
         ik_solutions = np.delete(ik_solutions, nan_idx, axis=1)
+
+        return ik_solutions
+
+    def _filter_dynamixel_limits(self, ik_solutions: np.array) -> np.array:
+        """
+        Args:
+            ik_solutions: ik_solutions: inverse kinematics solutions
+
+        Returns:
+            inverse kinematics solutions with solution columns with
+            invalid angles removed
+
+        """
+        min_mask = (DYNAMIXEL_MIN_ANGLE < ik_solutions)
+        max_mask = (DYNAMIXEL_MAX_ANGLE > ik_solutions)
+
+
+
+        select_idx = np.logical_and(min_mask, max_mask).all(axis=0)
+
+        print('min_mask ', min_mask)
+        print('max_mask ', max_mask)
+        print('select_idx ', select_idx)
+
+        ik_solutions = ik_solutions[:, select_idx]
+
+        print('selected ik solutions ', ik_solutions)
 
         return ik_solutions
 

@@ -6,7 +6,7 @@ from kinematics.kinematics import RobotKinematics
 from plotter import *
 from joint_controller.definitions import *
 
-CONFIG = [182.2, 200.0, 61.8, 99.1]
+CONFIG = [70, 70, 100]
 
 base_height = BASE_HEIGHT
 link_lengths = LINK_LENGTHS
@@ -46,6 +46,8 @@ def update(val):
     if joint_angles is None:
         print(f"unreachable position {position}")
         return
+
+    print('chosen joint angles [deg]', np.around(np.rad2deg(joint_angles), 3))
 
     joint_pos = rk.joint_pos(joint_angles)
 

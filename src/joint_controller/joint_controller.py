@@ -38,12 +38,16 @@ class JointController():
 
         # desired pose subscriber
         self.pose_sub =\
-            rospy.Subscriber(NODE_DESIRED_POS, Pose, self._pose_sub_handler)
+            rospy.Subscriber(NODE_DESIRED_POS,
+                             Pose,
+                             self._pose_sub_handler,
+                             queue_size=10)
 
         # desired pose array (x, y, z, 3R orientation) subscriber
         self.pose_array_sub = rospy.Subscriber(NODE_DESIRED_POSE4,
                                                Pose4,
-                                               self._pose4_sub_handler)
+                                               self._pose4_sub_handler,
+                                               queue_size=10)
 
     def publish_joint_angles(self, joint_angles, velocity=None, verbose=True):
         """
@@ -63,6 +67,8 @@ class JointController():
 
         if velocity is None:
             velocity = np.ones(4) * DEFAULT_VELOCITY
+
+        print('velocity ', velocity)
 
         # create JointState message from angles
         msg = JointState(
@@ -90,6 +96,9 @@ class JointController():
 
     def _pose_sub_handler(self, pose: Pose):
         desired_position = numpify(pose.position)
+
+        print('desired position: ', desired_position)
+
         joint_angles, orientation = self.rk.pick_pose_from_position(desired_position)
 
         if joint_angles is None:
@@ -97,6 +106,8 @@ class JointController():
             return
 
         print('chosen orientation %.3f deg' % np.rad2deg(orientation))
+
+        print('chosen joint angles ', joint_angles)
 
         # create and publish JointState message
         self.publish_joint_angles(joint_angles)

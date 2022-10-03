@@ -30,6 +30,9 @@ VERTICAL_THRESHOLD = 10  # [mm]
 # to Dynamixels 2 and 3
 DIRECTIONAL_MULTIPLIERS = np.array([1, 1, 1, -1])
 DEFAULT_VELOCITY = 0.5  # [rad/s]
+# minimum and maximum allowed dynamixel angles
+DYNAMIXEL_MIN_ANGLE = np.deg2rad(-145)
+DYNAMIXEL_MAX_ANGLE = np.deg2rad(145)
 
 
 
