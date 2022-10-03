@@ -31,10 +31,10 @@ class RobotKinematics(KinematicsBase):
         Returns:
 
         """
+        # joint positions (joint angle combination, [x, y, z] coordinate, joint number)
         ik_joint_positions = self.get_ik_joint_positions(ik_solution)
-        print(ik_joint_positions.shape)
-        # second last joint at 4
-        target_idx = np.argmax(ik_joint_positions[2, 2, :])
+        # second last joint at idx 2, z axis is at idx 2
+        target_idx = np.argmax(ik_joint_positions[:, 2, 2])
 
         return ik_solution[:, target_idx]
 
@@ -46,13 +46,13 @@ class RobotKinematics(KinematicsBase):
 
         Returns:
             3d array of joint positions, dimensions are:
-             ([x, y, z] coordinate, joint number, joint angle combinations)
+             (joint angle combination, [x, y, z] coordinate, joint number)
 
         """
         num_sols = ik_solution.shape[1]
 
         return np.array([self.joint_pos(ik_solution[:, i])
-                         for i in range(num_sols)]).reshape((3, -1, num_sols))
+                         for i in range(num_sols)])
 
     # _____________________________ IK Filtering _______________________________
 
