@@ -5,6 +5,7 @@ from kinematics.kinematics_base import KinematicsBase
 from kinematics.collision import intersect_connected_segments
 from joint_controller.definitions import *
 
+
 class RobotKinematics(KinematicsBase):
     """
     Extends KinematicsBase with higher-level functionality:
@@ -158,8 +159,6 @@ class RobotKinematics(KinematicsBase):
         """
         min_mask = (DYNAMIXEL_MIN_ANGLE < ik_solutions)
         max_mask = (DYNAMIXEL_MAX_ANGLE > ik_solutions)
-
-
 
         select_idx = np.logical_and(min_mask, max_mask).all(axis=0)
 
