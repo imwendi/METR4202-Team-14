@@ -43,8 +43,8 @@ class KinematicsBase():
     #     """
     #     TODO: depreciated?
     #
-    #     Computes inverse kinematics and selects pos closest (least l1 norm)
-    #     from a given current pos.
+    #     Computes inverse kinematics and selects val closest (least l1 norm)
+    #     from a given current val.
     #
     #     Args:
     #         p: desired end-affector position (x, y, z)
@@ -52,7 +52,7 @@ class KinematicsBase():
     #         thetas: current joint angles
     #
     #     Returns:
-    #         new optimal pos
+    #         new optimal val
     #
     #     """
     #     new_joint_angles = self.ik(p, phi)

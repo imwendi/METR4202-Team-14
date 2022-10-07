@@ -43,10 +43,10 @@ def update(val):
     possible_joint_angles = rk.ik(np.array([x, y, z]), phi)
     # for i in range(4):
     #     joint_angles = possible_joint_angles[:, i]
-    #     pos = np.around(rk.joint_pos(joint_angles), 3)
+    #     val = np.around(rk.joint_pos(joint_angles), 3)
     #     deg_angles = np.around(np.rad2deg((joint_angles)), 3)
     #
-    #     print(f"Option {i}\nPos:{pos}\nJoint Angles:{deg_angles}\n")
+    #     print(f"Option {i}\nPos:{val}\nJoint Angles:{deg_angles}\n")
     # print('_'*80)
 
     joint_angles = possible_joint_angles[:, JOINT_ANGLES_IDX]
