@@ -7,7 +7,7 @@ import numpy as np
 from std_msgs.msg import Header, Float32MultiArray
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
-from joint_controller.msg import Pose4
+from team14.msg import Pose4
 
 # local modules
 from kinematics.kinematics import RobotKinematics

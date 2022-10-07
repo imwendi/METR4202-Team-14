@@ -15,7 +15,7 @@ import sys
 import time
 import rospy
 from joint_controller.definitions import *
-from joint_controller.msg import Pose4
+from team14.msg import Pose4
 
 rospy.init_node('pose_input')
 pose_pub = rospy.Publisher(NODE_DESIRED_POSE4, Pose4, queue_size=10)

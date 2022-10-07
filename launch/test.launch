@@ -5,7 +5,7 @@
 
     <!-- run pose control node -->
     <node name="pose_node"
-          pkg="joint_controller"
+          pkg="team14"
           type="start_joint_controller.py"
     />
 

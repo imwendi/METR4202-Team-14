@@ -157,16 +157,26 @@ class RobotKinematics(KinematicsBase):
             invalid angles removed
 
         """
-        min_mask = (DYNAMIXEL_MIN_ANGLE < ik_solutions)
-        max_mask = (DYNAMIXEL_MAX_ANGLE > ik_solutions)
+        # min_mask = (DYNAMIXEL_MIN_ANGLE < ik_solutions)
+        # max_mask = (DYNAMIXEL_MAX_ANGLE > ik_solutions)
+        #
+        # select_idx = np.logical_and(min_mask, max_mask).all(axis=0)
 
-        select_idx = np.logical_and(min_mask, max_mask).all(axis=0)
+        print('dynamixel limits shape', DYNAMIXEL_ANGLE_LIMS.shape)
+        print('ik_solutions shape ', ik_solutions.shape)
 
-        print('min_mask ', min_mask)
-        print('max_mask ', max_mask)
-        print('select_idx ', select_idx)
+        mask = np.array((np.abs(ik_solutions) < DYNAMIXEL_ANGLE_LIMS))
 
-        ik_solutions = ik_solutions[:, select_idx]
+        print('mask ', mask)
+        print('mask shape ', mask.shape)
+
+        mask = mask.all(axis=0)
+
+        # print('min_mask ', min_mask)
+        # print('max_mask ', max_mask)
+        print('select_idx ', mask)
+
+        ik_solutions = ik_solutions[:, mask]
 
         print('selected ik solutions ', ik_solutions)
 
