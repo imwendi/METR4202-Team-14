@@ -17,37 +17,40 @@ import rospy
 from joint_controller.definitions import *
 from claw.definitions import *
 from std_msgs.msg import String
-from geometry_msgs.msg import Pose, Point, Quaternion
+from team14.msg import Pose4
 
 rospy.init_node('pose_input')
-pose_pub = rospy.Publisher(NODE_DESIRED_POS, Pose, queue_size=10)
+pose_pub = rospy.Publisher(NODE_DESIRED_POSE4, Pose4, queue_size=10)
 claw_pub = rospy.Publisher(NODE_DESIRED_CLAW_POS, String, queue_size=10)
 
 last_claw_mode = 'open'
 
 def input_handler(user_in: str):
     global last_claw_mode
+
     data = user_in.split(' ')
 
-    if not (3 <= len(data) <= 4):
-        print("expected x y z (claw mode)", file=sys.stderr)
+    print(data)
+
+    if len(data) < 4:
+        print("expected 'x y z orientation <claw_mode>", file=sys.stderr)
         return
 
     claw_mode = last_claw_mode
-    if len(data) == 4:
+    if len(data) == 5:
         claw_mode = str(data[-1])
     last_claw_mode = claw_mode
 
-    data = [float(val) for val in data[:3]]
-    position = np.array(data)
+    data = [float(val) for val in data[:4]]
+    position = np.array(data[:3])
+    orientation = np.deg2rad(data[3])
 
-    msg = Pose(Point(*position), Quaternion(0, 0, 0, 0))
+    pose_pub.publish(Pose4(position, orientation))
+    claw_pub.publish(String(claw_mode))
 
-    pose_pub.publish(msg)
-    claw_pub.publish(claw_mode)
 
 if __name__ == '__main__':
     while not rospy.is_shutdown():
-        user_in = input("Input x y z (claw mode): ")
+        user_in = input("Input (x y z orientation claw_mode): ")
         input_handler(user_in)
         rospy.sleep(0.1)

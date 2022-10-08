@@ -3,10 +3,16 @@
     <!-- run dynamixel interface controller -->
     <include file="$(find dynamixel_interface)/launch/dynamixel_interface_controller.launch"/>
 
-    <!-- run pose control node -->
-    <node name="pose_node"
+    <!-- run joint controller node -->
+    <node name="joint_controller"
           pkg="team14"
           type="start_joint_controller.py"
+    />
+
+    <!-- run claw controller node -->
+    <node name="claw_controller"
+          pkg="team14"
+          type="start_claw_controller.py"
     />
 
 </launch>

@@ -15,32 +15,41 @@ import sys
 import time
 import rospy
 from joint_controller.definitions import *
+from claw.definitions import *
+from std_msgs.msg import String
 from team14.msg import Pose4
 
 rospy.init_node('pose_input')
 pose_pub = rospy.Publisher(NODE_DESIRED_POSE4, Pose4, queue_size=10)
+claw_pub = rospy.Publisher(NODE_DESIRED_CLAW_POS, String, queue_size=10)
 
+
+last_claw_mode = 'open'
 
 def input_handler(user_in: str):
+    global last_claw_mode
+
     data = user_in.split(' ')
 
-    if len(data) != 4:
-        print("expected 'radius degree z orientation", file=sys.stderr)
+    print(data)
+
+    if len(data) < 4:
+        print("expected 'x y z orientation <claw_mode>", file=sys.stderr)
         return
 
-    data = [float(val) for val in data]
-    # polar conversion
-    r, theta, z, orientation = data
+    claw_mode = last_claw_mode
+    if len(data) == 5:
+        claw_mode = str(data[-1])
+    last_claw_mode = claw_mode
 
-    print(f"orientation: {orientation} deg")
-
+    data = [float(val) for val in data[:4]]
+    r, theta, z = np.array(data[:3])
     theta = np.deg2rad(theta)
-    orientation = np.deg2rad(orientation)
-    x, y = r*np.cos(theta), r*np.sin(theta)
-
-    position = np.array([x, y, z])
+    position = np.array([r*np.cos(theta), r*np.sin(theta), z])
+    orientation = np.deg2rad(data[3])
 
     pose_pub.publish(Pose4(position, orientation))
+    claw_pub.publish(String(claw_mode))
 
 
 if __name__ == '__main__':

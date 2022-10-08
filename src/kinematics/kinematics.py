@@ -23,13 +23,14 @@ class RobotKinematics(KinematicsBase):
         super().__init__(*args, **kwargs)
         self.vertical_threshold = vertical_threshold
 
-    def pick_pose_from_position(self, position, intervals=50):
+    def pick_pose_from_position(self, position, orientation_options=None):
         """
         Given desired end-affector position (x, y, z), computes valid orientation
         and valid joint angles to reach that position.
 
         Args:
             position: end-affector position
+            orientation_options: array of 3R orientation angles to search through
 
         Returns:
             joint_angles: chosen joint angles or None to position cannot be reached
@@ -39,8 +40,12 @@ class RobotKinematics(KinematicsBase):
         joint_angles = None
         chosen_orientation = None
 
-        orientation_options = np.concatenate([np.linspace(120, 140, intervals//2),
-                                              np.linspace(0, 120, intervals//2)])
+        if orientation_options is None:
+            orientation_options = np.concatenate([
+                np.linspace(180, 90, 50),
+                np.linspace(90, -180, 50)
+            ])
+
         orientation_options = np.deg2rad(orientation_options)
 
         # TODO: delete print
