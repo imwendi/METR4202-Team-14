@@ -6,11 +6,6 @@
     <!-- run dynamixel interface controller -->
     <include file="$(find dynamixel_interface)/launch/dynamixel_interface_controller.launch"/>
 
-<!--    &lt;!&ndash; run aruco node &ndash;&gt;-->
-<!--    <include file="$(find ximea_ros)/launch/ximea_aruco.launch">-->
-<!--    <arg name="serial" value="31708951"/>-->
-<!--    <include/>-->
-
     <!-- run joint controller node -->
     <node name="joint_controller"
           pkg="team14"
@@ -21,6 +16,17 @@
     <node name="claw_controller"
           pkg="team14"
           type="start_claw_controller.py"
+    />
+
+    <!-- run aruco node -->
+    <include file="$(find ximea_ros)/launch/ximea_aruco.launch">
+        <arg name="serial" value="31708951" />
+    </include>
+
+    <!-- run ximea demo -->
+    <node name="ximea_demo"
+          pkg="ximea_ros"
+          type="ximea_demo"
     />
 
     <!-- run colour node -->
