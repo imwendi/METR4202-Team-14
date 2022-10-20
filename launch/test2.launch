@@ -29,10 +29,18 @@
           type="ximea_demo"
     />
 
+    <!-- run rqt image view -->
+    <node name="rqt_image_view"
+          pkg="rqt_image_view"
+          type="rqt_image_view"
+    />
+
     <!-- run colour node -->
     <node name="color_controller"
           pkg="team14"
           type="start_color_controller.py"
     />
+
+
 
 </launch>
