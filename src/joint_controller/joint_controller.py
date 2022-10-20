@@ -13,6 +13,7 @@ from team14.msg import Pose4
 from kinematics.kinematics import RobotKinematics
 from joint_controller.definitions import *
 from joint_controller.utils import numpify
+from kinematics.utils import rot
 
 
 class JointController():
@@ -29,6 +30,10 @@ class JointController():
         # desired joint states publisher
         self.joint_pub = \
             rospy.Publisher(NODE_DESIRED_JOINT_STATES, JointState, queue_size=10)
+        
+        # Current pose publisher
+        self.pose_pub = \
+                rospy.Publisher('current_pose', Pose4, queue_size=10)
 
         # ____________________________ Subscribers _____________________________
         # joint states subscriber
@@ -87,12 +92,16 @@ class JointController():
             current joint angles
 
         """
-        return np.array(self.joint_state.position)
-
+        return np.array(np.flip(self.joint_state.position))
     # __________________________ SUBSCRIBER HANDLERS ___________________________
 
     def _joint_sub_handler(self, joint_state: JointState):
         self.joint_state = joint_state
+        current_pose = self.rk.joint_pos(self.get_joint_angles()*DIRECTIONAL_MULTIPLIERS)[:,-1]
+        # current_pose = rot(0,0,np.pi).T@current_pose
+        pose_msg = current_pose.tolist()
+
+        self.pose_pub.publish(pose_msg,1)
 
     def _pose_sub_handler(self, pose: Pose):
         desired_position = numpify(pose.position)
