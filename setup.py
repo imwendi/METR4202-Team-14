@@ -8,7 +8,8 @@ setup_args = generate_distutils_setup(
     packages=['kinematics',
               'joint_controller',
               'claw',
-              'vision'],
+              'vision',
+              'robot'],
     package_dir={'': 'src'})
 
 setup(**setup_args)

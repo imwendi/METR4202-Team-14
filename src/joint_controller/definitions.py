@@ -10,6 +10,8 @@ NODE_JOINT_STATES = 'joint_states'
 NODE_DESIRED_JOINT_STATES = 'desired_joint_states'
 NODE_DESIRED_POS = 'desired_pose'
 NODE_DESIRED_POSE4 = 'desired_pose4'
+NODE_CURRENT_POSE = 'current_pose'
+NODE_IK_FEEDBACK = 'ik_feedback'
 
 # _________________________________ GEOMETRY ___________________________________
 # robot measurements [mm] (426 total)

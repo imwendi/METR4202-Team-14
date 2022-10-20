@@ -1,9 +1,11 @@
 import numpy as np
+import time
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Transform
 from joint_controller.utils import numpify
 from vision.definitions import CAMERA_SCALE
-
+from vision.definitions import T_ROBOT_CAM
+from kinematics.utils import apply_transform
 from joint_controller.definitions import *
 
 
@@ -27,6 +29,8 @@ class Cube:
         self.positions = []
         # cube z orientations
         self.orientations = []
+        # measurement timestamps
+        self.timestamps = []
         self.cache_length = cache_length
         self.avg_length = avg_length
         self.moving_threshold = moving_threshold
@@ -36,8 +40,10 @@ class Cube:
         if transform is None:
             return
 
-        # extract
+        # scale and transform cube position to robot stationary frame
         position = numpify(transform.translation) * CAMERA_SCALE
+        position = apply_transform(T_ROBOT_CAM, position)
+
         quaternion = numpify(transform.rotation)
         euler_angles = euler_from_quaternion(quaternion)
         z_orientation = euler_angles[-1]
@@ -51,6 +57,7 @@ class Cube:
 
         self.positions.append(position)
         self.orientations.append(z_orientation)
+        self.timestamps.append(time.time())
 
         # print(f"Cube {self.id}: {np.around(np.rad2deg(z_orientation), 2)} deg")
 
@@ -59,6 +66,8 @@ class Cube:
             self.positions = self.positions[-self.cache_length:]
         if (len(self.orientations) > self.cache_length):
             self.orientations = self.orientations[-self.cache_length:]
+        if (len(self.timestamps) > self.cache_length):
+            self.timestamps = self.timestamps[-self.cache_length:]
 
     def avg_pos(self):
         """

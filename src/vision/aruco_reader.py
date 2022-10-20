@@ -4,7 +4,6 @@ import rospy
 from joint_controller.definitions import *
 from fiducial_msgs.msg import FiducialTransformArray
 from vision.cube import Cube
-from vision.definitions import TRANSFORM_MATRIX
 
 
 
@@ -24,7 +23,7 @@ class ArucoReader:
                                     self._process_fiducials  # Callback function (required)
                                     )
 
-    def get_closest(self, target_position: np.array) -> Cube:
+    def get_closest(self, target_position: np.array):
         """
         Finds cube closest to a target position
 
@@ -35,11 +34,15 @@ class ArucoReader:
             Cube instance for closest cube
 
         """
-        closest_cube = self.cubes[0]
-        displacement = np.linalg.norm(closest_cube.avg_pos() - target_position)
-        for cube in self.cubes[1:]:
+        if len(self.cubes) == 0:
+            return None
+
+        closest_cube = None
+        displacement = 42069    # haha
+        cubes = list(self.cubes.values())
+        for cube in cubes:
             new_displacement = np.linalg.norm(cube.avg_pos() - target_position)
-            if new_displacement < displacement:
+            if closest_cube is None or new_displacement < displacement:
                 displacement = new_displacement
                 closest_cube = cube
 

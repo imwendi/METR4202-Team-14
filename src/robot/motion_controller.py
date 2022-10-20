@@ -17,7 +17,14 @@ class MotionController:
         self.closeness_threshold = closeness_threshold
         self.max_wait_time = max_wait_time
 
+        # last requested position
         self.last_desired_pos = np.zeros(3)
+
+        # last position
+        self.last_position = np.zeros(3)
+        self.pose_sub = rospy.Subscriber(NODE_CURRENT_POSE,
+                                         Pose4,
+                                         self._pose_sub_handler)
 
         # last ik feedback
         self.ik_feedback = None
@@ -25,11 +32,6 @@ class MotionController:
                                              IKFeedback,
                                              callback=self._ik_feedback_handler,
                                              queue_size=10)
-        # last position
-        self.last_position = np.zeros(3)
-        self.pose_sub = rospy.Subscriber(NODE_CURRENT_POSE,
-                                    Pose4,
-                                    self._pose_sub_handler)
 
         # desired position publisher
         self.pose_pub = rospy.Publisher(NODE_DESIRED_POS, Pose, queue_size=10)
