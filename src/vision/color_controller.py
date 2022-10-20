@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import rospy
 from math import pi, dist
 import cv2

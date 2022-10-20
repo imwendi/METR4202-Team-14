@@ -1,14 +1,15 @@
-#!/usr/bin/env python3
-
-import rospy
 import numpy as np
-from scipy.spatial.transform import Rotation
-from joint_controller.definitions import *
+from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Transform
+from joint_controller.utils import numpify
+import rospy
+
+from joint_controller.definitions import *
 
 
 class Cube:
     def __init__(self,
+                 id,
                  cache_length=50,
                  avg_length=10,
                  moving_threshold=10):
@@ -16,10 +17,12 @@ class Cube:
         Constructor
 
         Args:
+            id: Fiducial id
             cache_length: length of position and z orientation caches
             avg_length: number of values to compute moving average over
             moving_threshold: position delta threshold to determine if cube is moving
         """
+        self.id = id
         # cube positions
         self.positions = []
         # cube z orientations
@@ -34,10 +37,10 @@ class Cube:
             return
 
         # extract
-        position = np.array(transform.translation)
-        quaternion = np.array(transform.rotation)
-        rot = Rotation.from_quat(quaternion)
-        z_orientation = rot.as_euler('xyz')[-1]
+        position = numpify(transform.translation)
+        quaternion = numpify(transform.rotation)
+        euler_angles = euler_from_quaternion(quaternion)
+        z_orientation = euler_angles[-1]
 
         # check if moving
         pos_change = position - self.average_pos()
@@ -48,6 +51,9 @@ class Cube:
 
         self.positions.append(position)
         self.orientations.append(z_orientation)
+
+        print(f"Cube {self.id}: {np.around(np.rad2deg(z_orientation), 2)} deg")
+
         # truncate lists if needed
         if (len(self.positions) > self.cache_length):
             self.positions = self.positions[-self.cache_length:]
@@ -59,7 +65,7 @@ class Cube:
         Returns:
             Moving average over last self.avg_pos values
         """
-        values = np.array(self.positions[:max(-self.avg_length, len(self.positions))])
+        values = np.array(self.positions)[:max(-self.avg_length, len(self.positions))]
 
         # TODO: check axis!
-        return np.mean(values, axis=-1)
+        return np.mean(values, axis=0)

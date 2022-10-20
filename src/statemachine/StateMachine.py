@@ -39,8 +39,6 @@ class StateMachine:
             if np.linalg.norm(position, self.last_position) < 10: # TODO: closeness threshold
                 return True
 
-    rospy.is
-
     def _ik_feedback_handler(self, feedback: IKFeedback):
         self.ik_feedback = (feedback.position, feedback.reachable)
 
