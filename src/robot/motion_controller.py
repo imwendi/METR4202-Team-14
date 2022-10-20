@@ -7,16 +7,27 @@ from joint_controller.definitions import *
 from geometry_msgs.msg import Pose, Point, Quaternion
 from team14.msg import IKFeedback, Pose4
 
-class StateMachine:
-    def __init__(self):
+"""
+Class to send and receive high level desired position messages to joint nodes
+"""
+class MotionController:
+    def __init__(self,
+                 closeness_threshold=10,
+                 max_wait_time=5):
+        self.closeness_threshold = closeness_threshold
+        self.max_wait_time = max_wait_time
+
         self.last_desired_pos = np.zeros(3)
 
         # last ik feedback
         self.ik_feedback = None
-        self.feedback_sub = rospy.Subscriber(NODE_IK_FEEDBACK, IKFeedback, callback=self._ik_feedback_handler, queue_size=10)
+        self.feedback_sub = rospy.Subscriber(NODE_IK_FEEDBACK,
+                                             IKFeedback,
+                                             callback=self._ik_feedback_handler,
+                                             queue_size=10)
         # last position
         self.last_position = np.zeros(3)
-        self.pose_sub = rospy.Subscriber('current_pose',
+        self.pose_sub = rospy.Subscriber(NODE_CURRENT_POSE,
                                     Pose4,
                                     self._pose_sub_handler)
 
@@ -28,7 +39,7 @@ class StateMachine:
         self.pose_pub.publish(msg)
         start_time = time.time()
 
-        while (time.time() - start_time) < 5: # TODO: max wait time
+        while (time.time() - start_time) < self.max_wait_time:
             feedback_pos, reachable = self.ik_feedback
 
             # check if position is valid from IK
@@ -36,7 +47,8 @@ class StateMachine:
                 return False
 
             # check if position reached
-            if np.linalg.norm(position, self.last_position) < 10: # TODO: closeness threshold
+            if np.linalg.norm(position,
+                              self.last_position) < self.closeness_threshold:
                 return True
 
     def _ik_feedback_handler(self, feedback: IKFeedback):

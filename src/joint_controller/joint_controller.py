@@ -7,7 +7,7 @@ import numpy as np
 from std_msgs.msg import Header, Float32MultiArray
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
-from team14.msg import Pose4
+from team14.msg import Pose4, IKFeedback
 
 # local modules
 from kinematics.kinematics import RobotKinematics
@@ -33,7 +33,11 @@ class JointController():
         
         # Current pose publisher
         self.pose_pub = \
-                rospy.Publisher('current_pose', Pose4, queue_size=10)
+                rospy.Publisher(NODE_CURRENT_POSE, Pose4, queue_size=10)
+
+        # IK feedback publisher
+        self.ik_feedback_pub = \
+                rospy.Publisher(NODE_IK_FEEDBACK, IKFeedback, queue_size=10)
 
         # ____________________________ Subscribers _____________________________
         # joint states subscriber
@@ -92,16 +96,26 @@ class JointController():
             current joint angles
 
         """
-        return np.array(np.flip(self.joint_state.position))
-    # __________________________ SUBSCRIBER HANDLERS ___________________________
+        return np.array(np.flip(self.joint_state.position)) * DIRECTIONAL_MULTIPLIERS
 
+    # __________________________ SUBSCRIBER HANDLERS ___________________________
     def _joint_sub_handler(self, joint_state: JointState):
+        """
+        Joint state callback which converts joint angles to robot position
+        and end effector orientation. Corresponding Pose4 message is published.
+
+        Args:
+            joint_state: raw dynamixel joint angles
+
+        """
         self.joint_state = joint_state
-        current_pose = self.rk.joint_pos(self.get_joint_angles()*DIRECTIONAL_MULTIPLIERS)[:,-1]
-        # current_pose = rot(0,0,np.pi).T@current_pose
+        joint_angles = self.get_joint_angles()
+        joint_pos = self.rk.joint_pos(joint_angles)
+        current_pose = joint_pos[:,-1]
+        phi = np.sum(joint_pos[1:])
         pose_msg = current_pose.tolist()
 
-        self.pose_pub.publish(pose_msg,1)
+        self.pose_pub.publish(pose_msg, phi)
 
     def _pose_sub_handler(self, pose: Pose):
         desired_position = numpify(pose.position)

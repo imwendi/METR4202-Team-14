@@ -43,7 +43,7 @@ class Cube:
         z_orientation = euler_angles[-1]
 
         # check if moving
-        pos_change = position - self.average_pos()
+        pos_change = position - self.avg_pos()
         if np.linalg.norm(pos_change) > self.moving_threshold:
             self.moving = True
         else:
@@ -60,7 +60,7 @@ class Cube:
         if (len(self.orientations) > self.cache_length):
             self.orientations = self.orientations[-self.cache_length:]
 
-    def average_pos(self):
+    def avg_pos(self):
         """
         Returns:
             Moving average over last self.avg_pos values

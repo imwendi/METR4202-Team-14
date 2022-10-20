@@ -24,6 +24,27 @@ class ArucoReader:
                                     self._process_fiducials  # Callback function (required)
                                     )
 
+    def get_closest(self, target_position: np.array) -> Cube:
+        """
+        Finds cube closest to a target position
+
+        Args:
+            target_position: position to compare to
+
+        Returns:
+            Cube instance for closest cube
+
+        """
+        closest_cube = self.cubes[0]
+        displacement = np.linalg.norm(closest_cube.avg_pos() - target_position)
+        for cube in self.cubes[1:]:
+            new_displacement = np.linalg.norm(cube.avg_pos() - target_position)
+            if new_displacement < displacement:
+                displacement = new_displacement
+                closest_cube = cube
+
+        return closest_cube
+
     def _process_fiducials(self, fid_array: FiducialTransformArray):
         for fid_transform in fid_array.transforms:
             id = fid_transform.fiducial_id

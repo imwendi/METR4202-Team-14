@@ -10,15 +10,14 @@ NODE_JOINT_STATES = 'joint_states'
 NODE_DESIRED_JOINT_STATES = 'desired_joint_states'
 NODE_DESIRED_POS = 'desired_pose'
 NODE_DESIRED_POSE4 = 'desired_pose4'
-NODE_IK_FEEDBACK = 'ik_feedback'
 
 # _________________________________ GEOMETRY ___________________________________
 # robot measurements [mm] (426 total)
-BASE_HEIGHT = 46
-L1 = 55
-L2 = 120
+BASE_HEIGHT = 47
+L1 = 54
+L2 = 117
 L3 = 95
-L4 = 110
+L4 = 105
 LINK_LENGTHS = np.array([L1, L2, L3, L4])
 L = np.sum(LINK_LENGTHS)
 
