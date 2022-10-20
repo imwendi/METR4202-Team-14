@@ -1,22 +1,7 @@
 <launch>
 
-    <!-- set memory limits and start pigpiod -->
-    <node name="sudo_setup" pkg="team14" type="setup.sh" />
-
-    <!-- run dynamixel interface controller -->
-    <include file="$(find dynamixel_interface)/launch/dynamixel_interface_controller.launch"/>
-
-    <!-- run joint controller node -->
-    <node name="joint_controller"
-          pkg="team14"
-          type="start_joint_controller.py"
-    />
-
-    <!-- run claw controller node -->
-    <node name="claw_controller"
-          pkg="team14"
-          type="start_claw_controller.py"
-    />
+<!--    &lt;!&ndash; set memory limits and start pigpiod &ndash;&gt;-->
+<!--    <node name="sudo_setup" pkg="team14" type="setup.sh" launch-prefix="sudo"/>-->
 
     <!-- run aruco node -->
     <include file="$(find ximea_ros)/launch/ximea_aruco.launch">
@@ -39,6 +24,21 @@
     <node name="color_controller"
           pkg="team14"
           type="start_color_controller.py"
+    />
+
+    <!-- run dynamixel interface controller -->
+    <include file="$(find dynamixel_interface)/launch/dynamixel_interface_controller.launch"/>
+
+    <!-- run joint controller node -->
+    <node name="joint_controller"
+          pkg="team14"
+          type="start_joint_controller.py"
+    />
+
+    <!-- run claw controller node -->
+    <node name="claw_controller"
+          pkg="team14"
+          type="start_claw_controller.py"
     />
 
 
