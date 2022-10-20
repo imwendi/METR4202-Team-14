@@ -1,10 +1,11 @@
 import numpy as np
 import time
 import rospy
+import tf2_ros
+
 from joint_controller.definitions import *
 from geometry_msgs.msg import Pose, Point, Quaternion
 from team14.msg import IKFeedback, Pose4
-
 
 class StateMachine:
     def __init__(self):
@@ -37,6 +38,8 @@ class StateMachine:
             # check if position reached
             if np.linalg.norm(position, self.last_position) < 10: # TODO: closeness threshold
                 return True
+
+    rospy.is
 
     def _ik_feedback_handler(self, feedback: IKFeedback):
         self.ik_feedback = (feedback.position, feedback.reachable)

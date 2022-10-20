@@ -52,6 +52,7 @@ catkin_python_setup()
 add_message_files(
   FILES
   Pose4.msg
+  IKFeedback.msg
 )
 
 ## Generate services in the 'srv' folder
