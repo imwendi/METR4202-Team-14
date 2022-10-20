@@ -4,16 +4,9 @@ import rospy
 from joint_controller.definitions import *
 from fiducial_msgs.msg import FiducialTransformArray
 from vision.cube import Cube
+from vision.definitions import TRANSFORM_MATRIX
 
 
-# camera frame to robot base frame
-TRANSFORM_MATRIX = np.array([[0, 1, 0, 190],
-                             [1, 0, 0, 0],
-                             [0, 0, -1, 426],
-                             [0, 0, 0, 1]])
-
-# scale from camera to metric units
-SCALE = 450/2.42
 
 
 class ArucoReader:
@@ -42,3 +35,8 @@ class ArucoReader:
             cube = self.cubes[id]
 
             cube.update(transform)
+
+            if cube.moving:
+                print(f"cube {cube.id} moving!")
+            else:
+                print()

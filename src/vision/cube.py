@@ -2,7 +2,7 @@ import numpy as np
 from tf.transformations import euler_from_quaternion
 from geometry_msgs.msg import Transform
 from joint_controller.utils import numpify
-import rospy
+from vision.definitions import CAMERA_SCALE
 
 from joint_controller.definitions import *
 
@@ -11,8 +11,8 @@ class Cube:
     def __init__(self,
                  id,
                  cache_length=50,
-                 avg_length=10,
-                 moving_threshold=10):
+                 avg_length=5,
+                 moving_threshold=15):
         """
         Constructor
 
@@ -37,7 +37,7 @@ class Cube:
             return
 
         # extract
-        position = numpify(transform.translation)
+        position = numpify(transform.translation) * CAMERA_SCALE
         quaternion = numpify(transform.rotation)
         euler_angles = euler_from_quaternion(quaternion)
         z_orientation = euler_angles[-1]
@@ -52,7 +52,7 @@ class Cube:
         self.positions.append(position)
         self.orientations.append(z_orientation)
 
-        print(f"Cube {self.id}: {np.around(np.rad2deg(z_orientation), 2)} deg")
+        # print(f"Cube {self.id}: {np.around(np.rad2deg(z_orientation), 2)} deg")
 
         # truncate lists if needed
         if (len(self.positions) > self.cache_length):
@@ -65,7 +65,7 @@ class Cube:
         Returns:
             Moving average over last self.avg_pos values
         """
-        values = np.array(self.positions)[:max(-self.avg_length, len(self.positions))]
+        values = np.array(self.positions)[max(-self.avg_length, -len(self.positions)):-1]
 
         # TODO: check axis!
         return np.mean(values, axis=0)
