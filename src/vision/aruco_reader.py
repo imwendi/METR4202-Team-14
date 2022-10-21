@@ -23,7 +23,7 @@ class ArucoReader:
                                     self._process_fiducials  # Callback function (required)
                                     )
 
-    def get_closest(self, target_position: np.array):
+    def get_closest(self, target_position: np.array, verbose=False):
         """
         Finds cube closest to a target position
 
@@ -46,7 +46,13 @@ class ArucoReader:
                 displacement = new_displacement
                 closest_cube = cube
 
+        if verbose:
+            print(f"Cube {closest_cube.id} closest at {np.around(closest_cube.avg_pos(), 3)}")
+
         return closest_cube
+
+    def remove_cube(self, id):
+        self.cubes.pop(id)
 
     def _process_fiducials(self, fid_array: FiducialTransformArray):
         for fid_transform in fid_array.transforms:

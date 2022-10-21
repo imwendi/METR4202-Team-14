@@ -59,7 +59,7 @@ class MotionController:
                 return True
 
             # TODO: remove this sleep?
-            time.sleep(0.1)
+            # time.sleep(0.1)
 
     def _ik_feedback_handler(self, feedback: IKFeedback):
         self.ik_feedback = (feedback.position, feedback.reachable)
