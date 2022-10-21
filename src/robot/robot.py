@@ -45,30 +45,47 @@ class Robot:
 
         print('target_pos ', target_pos)
         # check target_pos is valid
-        if not np.any(np.isnan(target_pos)):
+        if not target_pos is None and not np.any(np.isnan(target_pos)):
             target_pos[-1] = FOLLOW_HEIGHT
             self.motion_controller.move_to_pos(target_pos)
         else:
             print("got here :(")
             return False
 
-        #time.sleep(1)
+        # move to grabbing position
         target_pos[-1] = GRAB_HEIGHT
         self.motion_controller.move_to_pos(target_pos)
 
-        #time.sleep(2)
+        # attempt to grab
         self.set_claw('close')
-
         time.sleep(1)
+
+        # check color
         self.motion_controller.move_to_pos(COLOR_CHECK_POS)
+        # sleep to update color
+        time.sleep(2)
 
-        #time.sleep(2)
-        self.motion_controller.move_to_pos(DUMP_POS)
+        color = self.aruco_reader.identify_color()
+        print(f"picked up {color} block!")
+        if color in COLOR_ZONES.keys():
+            dump_pos = COLOR_ZONES[color]
+        else:
+            # return if no correct color detected, i.e. likely cube not
+            # successfully grabbed
+            self.motion_controller.move_to_pos(HOME_POS)
 
-        #time.sleep(2)
+            # remove cube to re-detect its position on next iteration
+            self.aruco_reader.remove_cube(cube.id)
+            return False
+
+        # move to dump zone
+        self.motion_controller.move_to_pos(dump_pos)
+
+        # yeet cube
         self.set_claw('open')
         time.sleep(2)
 
+        # delete cube from tracked cubes
         self.aruco_reader.remove_cube(cube.id)
 
     def _color_handler(self, msg: String):
