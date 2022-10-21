@@ -4,7 +4,7 @@ import numpy as np
 FOLLOW_HEIGHT = 65
 
 # z-height to grab cube at
-GRAB_HEIGHT = 40
+GRAB_HEIGHT = 30
 
 # position at which to check colour
 COLOR_CHECK_POS = np.array([210, -20, 300])

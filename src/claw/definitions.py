@@ -1,7 +1,7 @@
 # claw PWM pin
 CLAW_PIN = 18
 # close position
-CLOSE = 950
+CLOSE = 1000
 # grip position
 GRIP = 1200
 # open position
