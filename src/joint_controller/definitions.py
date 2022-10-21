@@ -36,7 +36,8 @@ VERTICAL_THRESHOLD = 10  # [mm]
 # Dynamixel 4 angle needs to be *= -1 as it is installed in opposite orientation
 # to Dynamixels 2 and 3
 DIRECTIONAL_MULTIPLIERS = np.array([1, 1, 1, -1])
-DEFAULT_VELOCITY = 0.5  # [rad/s]
+#DEFAULT_VELOCITY = 0.5  # [rad/s]
+DEFAULT_VELOCITY = 1.2
 
 # TODO: depreciated?
 # minimum and maximum allowed dynamixel angles

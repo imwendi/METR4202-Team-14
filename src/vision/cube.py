@@ -12,7 +12,7 @@ from joint_controller.definitions import *
 class Cube:
     def __init__(self,
                  id,
-                 cache_length=50,
+                 cache_length=10,
                  avg_length=5,
                  moving_threshold=15):
         """

@@ -41,7 +41,8 @@ class Robot:
             if cube is not None and not cube.moving:
                 target_pos = cube.avg_pos()
             else:
-                print()
+                if cube is not None and cube.moving:
+                    print("got hereeee")
 
         print('target_pos ', target_pos)
         # check target_pos is valid
@@ -57,8 +58,11 @@ class Robot:
         self.motion_controller.move_to_pos(target_pos)
 
         # attempt to grab
-        self.set_claw('close')
         time.sleep(1)
+        self.set_claw('open')
+        time.sleep(1.5)
+        self.set_claw('grip')
+        time.sleep(1.5)
 
         # check color
         self.motion_controller.move_to_pos(COLOR_CHECK_POS)
@@ -72,7 +76,10 @@ class Robot:
         else:
             # return if no correct color detected, i.e. likely cube not
             # successfully grabbed
-            self.motion_controller.move_to_pos(HOME_POS)
+            self.motion_controller.move_to_pos(START_POS)
+            # or drop block just in case it was grabbed
+            self.set_claw('open')
+            time.sleep(1)
 
             # remove cube to re-detect its position on next iteration
             self.aruco_reader.remove_cube(cube.id)
@@ -84,6 +91,10 @@ class Robot:
         # yeet cube
         self.set_claw('open')
         time.sleep(2)
+
+        # move robot to suitable height
+        dump_pos[-1] = FOLLOW_HEIGHT
+        self.motion_controller.move_to_pos(dump_pos)
 
         # delete cube from tracked cubes
         self.aruco_reader.remove_cube(cube.id)
