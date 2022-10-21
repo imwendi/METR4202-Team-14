@@ -14,8 +14,13 @@ class Robot:
         self.motion_controller = MotionController()
         self.aruco_reader = ArucoReader()
 
+        # last detected color
+        self.color = None
+
         # claw controller publisher
         self.claw_pub = rospy.Publisher(NODE_DESIRED_CLAW_POS, String)
+        # color subscriber
+        self.color_sub = rospy.Subscriber(NODE_COLOR, String, callback=self._color_handler)
 
 
     def set_claw(self, claw_mode):
@@ -65,5 +70,8 @@ class Robot:
         time.sleep(2)
 
         self.aruco_reader.remove_cube(cube.id)
+
+    def _color_handler(self, msg: String):
+        self.color = msg.data
 
 

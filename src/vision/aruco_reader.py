@@ -6,8 +6,6 @@ from fiducial_msgs.msg import FiducialTransformArray
 from vision.cube import Cube
 
 
-
-
 class ArucoReader:
     """
     Class for continuously parsing Aruco data
@@ -18,10 +16,10 @@ class ArucoReader:
         self.cubes = {}
 
         # fiducial subscriber
-        self.sub = rospy.Subscriber('/fiducial_transforms',  # Topic name
-                                    FiducialTransformArray,  # Message type
-                                    self._process_fiducials  # Callback function (required)
-                                    )
+        self.fid_sub = rospy.Subscriber('/fiducial_transforms',  # Topic name
+                                        FiducialTransformArray,  # Message type
+                                        self._process_fiducials  # Callback function (required)
+                                        )
 
     def get_closest(self, target_position: np.array, verbose=False):
         """
