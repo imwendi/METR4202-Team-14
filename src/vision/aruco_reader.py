@@ -27,7 +27,7 @@ class ArucoReader:
 
         # list storing historical color data
         self.color_cache_len = color_cache_len
-        self.color_cache = []
+        self.color_cache = [np.zeros(3)]
 
         # RGB color subscriber
         self.rgb_sub = rospy.Subscriber(NODE_RGB_COLOR,
@@ -51,6 +51,10 @@ class ArucoReader:
     def identify_color(self, avg_len=5):
         avg_color = self.avg_color(avg_len=avg_len)
 
+        # TODO: remove!
+        # print('latest color ', self.color_cache[-1])
+        # print('avg color ', avg_color)
+
         return self.closest_color(avg_color)
 
     def closest_color(self, color_rgb):
@@ -70,7 +74,7 @@ class ArucoReader:
         for (name, color) in self.color_map.items():
             distance = color_utils.hsv_distance(color_rgb, color)
             if closest_color_name is None or distance < last_distance:
-                closest_color_name = color
+                closest_color_name = name
                 last_distance = distance
 
         return closest_color_name
@@ -93,9 +97,12 @@ class ArucoReader:
         color = np.array([rgb_color.r, rgb_color.g, rgb_color.b])
         self.color_cache.append(color)
 
+        # TODO: remove
+        # print("added color ", color)
+
         # truncate list if needed
         if len(self.color_cache) > self.color_cache_len:
-            self.color_cache = self.color_cache[:self.color_cache_len]
+            self.color_cache = self.color_cache[-self.color_cache_len:]
 
     def get_closest(self, target_position: np.array, verbose=False):
         """

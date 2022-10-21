@@ -33,7 +33,7 @@ def rgb_to_hsv(rgb):
 
     """
     # normalize
-    rgb /= 255.0
+    rgb = rgb / 255.0
 
     return colors.rgb_to_hsv(rgb)
 
