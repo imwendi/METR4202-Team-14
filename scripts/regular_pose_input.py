@@ -46,6 +46,7 @@ def input_handler(user_in: str):
     pose_pub.publish(msg)
     claw_pub.publish(claw_mode)
 
+
 if __name__ == '__main__':
     while not rospy.is_shutdown():
         user_in = input("Input x y z (claw mode): ")

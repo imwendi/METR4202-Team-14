@@ -13,3 +13,12 @@ T_ROBOT_CAM = np.array([[0, 1, 0, 220],
 
 # scale from camera to metric units
 CAMERA_SCALE = 450 / 2.42
+
+# RGB color node
+NODE_RGB_COLOR = 'test_color'
+
+# colors
+RED = np.array([255, 0, 0])
+GREEN = np.array([0, 255, 0])
+BLUE = np.array([0, 0, 255])
+YELLOW = np.array([255, 255, 0])
