@@ -41,11 +41,11 @@
           type="start_joint_controller.py"
     />
 
-    <!-- run claw controller node -->
-    <node name="claw_controller"
-          pkg="team14"
-          type="start_claw_controller.py"
-    />
+<!--    &lt;!&ndash; run claw controller node &ndash;&gt;-->
+<!--    <node name="claw_controller"-->
+<!--          pkg="team14"-->
+<!--          type="start_claw_controller.py"-->
+<!--    />-->
 
 
 

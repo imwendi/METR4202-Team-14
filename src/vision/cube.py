@@ -13,8 +13,8 @@ class Cube:
     def __init__(self,
                  id,
                  cache_length=10,
-                 avg_length=5,
-                 moving_threshold=15):
+                 avg_length=3,
+                 moving_threshold=10):
         """
         Constructor
 
@@ -52,8 +52,13 @@ class Cube:
         pos_change = position - self.avg_pos()
         if np.linalg.norm(pos_change) > self.moving_threshold:
             self.moving = True
+            print(f"Cube {self.id} moving!")
         else:
             self.moving = False
+
+        # ignore invalid values
+        if position is None or np.any(np.isnan(position)):
+            return False
 
         self.positions.append(position)
         self.orientations.append(z_orientation)
