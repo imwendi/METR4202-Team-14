@@ -38,7 +38,7 @@ def input_handler(user_in: str):
     print("moving to joint angles (deg)", np.around(np.rad2deg(joint_angles), 3))
     print()
 
-    velocity = np.ones(4) * 0.5
+    velocity = np.ones(4) * 1.25
 
     # create JointState message from angles
     msg = JointState(

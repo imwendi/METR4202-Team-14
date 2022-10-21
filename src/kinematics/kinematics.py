@@ -42,10 +42,13 @@ class RobotKinematics(KinematicsBase):
 
         if orientation_options is None:
             orientation_options = np.concatenate([
-                np.linspace(180, 90, 50),
+                np.linspace(170, 130, 50),
+                np.linspace(180, 70, 15),
+                np.linspace(130, 90, 30),
                 np.linspace(90, -180, 50)
-                # np.linspace(90, 180, 50),
-                # np.linspace(90, 0, 50)
+                # np.linspace(90, -180, 50),
+                # np.linspace(140, 90, 35),
+                # np.linspace(140, 180, 20),
             ])
 
         orientation_options = np.deg2rad(orientation_options)

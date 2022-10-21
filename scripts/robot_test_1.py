@@ -11,6 +11,5 @@ rob = Robot()
 if __name__ == '__main__':
     rob.motion_controller.move_to_pos(np.array([0, 0, 417]))
     while not rospy.is_shutdown():
-
         rob.task1()
-        time.sleep(0.25)
+        time.sleep(0.2)

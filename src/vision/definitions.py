@@ -1,7 +1,7 @@
 import numpy as np
 
 # camera frame to robot base frame
-T_ROBOT_CAM = np.array([[0, 1, 0, 220],
+T_ROBOT_CAM = np.array([[0, 1, 0, 230],
                         [1, 0, 0, 0],
                         [0, 0, -1, 426],
                         [0, 0, 0, 1]])
