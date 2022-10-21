@@ -15,11 +15,16 @@ NODE_IK_FEEDBACK = 'ik_feedback'
 
 # _________________________________ GEOMETRY ___________________________________
 # robot measurements [mm] (426 total)
-BASE_HEIGHT = 47
-L1 = 54
-L2 = 117
+# BASE_HEIGHT = 47
+# L1 = 54
+# L2 = 117
+# L3 = 95
+# L4 = 105
+BASE_HEIGHT = 46
+L1 = 55
+L2 = 120
 L3 = 95
-L4 = 105
+L4 = 110
 LINK_LENGTHS = np.array([L1, L2, L3, L4])
 L = np.sum(LINK_LENGTHS)
 

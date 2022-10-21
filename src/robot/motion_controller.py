@@ -37,21 +37,29 @@ class MotionController:
         self.pose_pub = rospy.Publisher(NODE_DESIRED_POS, Pose, queue_size=10)
 
     def move_to_pos(self, position: np.array):
+        # ignore NaN positions
+        if (np.any(np.isnan(position))):
+            return False
+        print("position ", position)
+
         msg = Pose(Point(*position), Quaternion(0, 0, 0, 0))
         self.pose_pub.publish(msg)
         start_time = time.time()
 
         while (time.time() - start_time) < self.max_wait_time:
-            feedback_pos, reachable = self.ik_feedback
+            #feedback_pos, reachable = self.ik_feedback
 
             # check if position is valid from IK
-            if feedback_pos == position and reachable == False:
-                return False
+            # if feedback_pos == position and reachable == False:
+            #     return False
 
             # check if position reached
-            if np.linalg.norm(position,
-                              self.last_position) < self.closeness_threshold:
+            if np.linalg.norm(position - self.last_position) < self.closeness_threshold:
+                print("finished motion!")
                 return True
+
+            # TODO: remove this sleep?
+            time.sleep(0.1)
 
     def _ik_feedback_handler(self, feedback: IKFeedback):
         self.ik_feedback = (feedback.position, feedback.reachable)

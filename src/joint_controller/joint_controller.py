@@ -117,6 +117,10 @@ class JointController():
 
         self.pose_pub.publish(pose_msg, phi)
 
+    def publish_ik_feedback(self, position: np.array, reachable: bool):
+        msg = IKFeedback(position, reachable)
+        self.ik_feedback_pub.publish(msg)
+
     def _pose_sub_handler(self, pose: Pose):
         desired_position = numpify(pose.position)
 
@@ -125,7 +129,7 @@ class JointController():
         joint_angles, orientation = self.rk.pick_pose_from_position(desired_position)
 
         if joint_angles is None:
-            print("invalid possible")
+            self.publish_ik_feedback(desired_position, False)
             return
 
         print('chosen orientation %.3f deg' % np.rad2deg(orientation))
@@ -134,6 +138,8 @@ class JointController():
 
         # create and publish JointState message
         self.publish_joint_angles(joint_angles)
+
+        self.publish_ik_feedback(desired_position, True)
 
     def _pose4_sub_handler(self, msg: Pose4):
         print('msg.position ', msg.position)
