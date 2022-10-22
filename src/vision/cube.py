@@ -41,6 +41,7 @@ class Cube:
         self.cache_length = cache_length
         self.avg_length = avg_length
         self.moving_threshold = moving_threshold
+        self.moving = False
 
     def update(self, transform: Transform):
         if transform is None:
@@ -64,6 +65,8 @@ class Cube:
             # print(f"Cube {self.id} moving!")
         else:
             moving = False
+
+        self.moving = moving
 
         # ignore invalid values
         if position is None or np.any(np.isnan(position)):
@@ -98,7 +101,6 @@ class Cube:
         for (key, val) in self.data.items():
             if len(val) > self.cache_length:
                 self.data[key] = val[-self.cache_length:]
-
 
     def avg_pos(self):
         """
