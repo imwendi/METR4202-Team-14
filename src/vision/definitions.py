@@ -17,7 +17,11 @@ CAMERA_SCALE = 450 / 2.42
 # RGB color node
 NODE_RGB_COLOR = 'test_color'
 
-RECENT_INTERVAL = 1.5
+# time threshold for detecting if turntable is moving/empty
+TURNTABLE_RECENT_THRESHOLD = 1.0
+
+# time threshold for detecting if a cube's data is recent
+CUBE_RECENT_THRESHOLD = 0.75
 
 # colors
 RED = np.array([255, 0, 0])

@@ -60,9 +60,12 @@ class ArucoReader:
 
         """
         curr_time = time.time()
-        for cube in self.cubes.values():
-            timestamp, _, _, _ = cube.get_latest_data()
-            if abs(curr_time - timestamp) < RECENT_INTERVAL:
+        cubes = list(self.cubes.values())
+        for cube in cubes:
+            timestamp = cube.get_latest_data('timestamp')
+
+            if timestamp is not None and abs(curr_time - timestamp)\
+                    < TURNTABLE_RECENT_THRESHOLD:
                 # turntable assumed moving if a cube has moved recently
                 return False
 
@@ -75,9 +78,10 @@ class ArucoReader:
 
         """
         curr_time = time.time()
-        for cube in self.cubes.values():
-            timestamp, _, _, moving = cube.get_latest_data()
-            if abs(curr_time - timestamp) < RECENT_INTERVAL and moving:
+        cubes = list(self.cubes.values())
+        for cube in cubes:
+            data = cube.get_latest_data()
+            if data is not None and abs(curr_time - data[0]) < TURNTABLE_RECENT_THRESHOLD and data[-1]:
                 # turntable assumed moving if a cube has moved recently
                 return True
 
@@ -148,23 +152,49 @@ class ArucoReader:
             target_position: position to compare to
 
         Returns:
-            Cube instance for closest cube
+            Cube instance for closest cube that has had its data updated
+            recently
 
         """
         if len(self.cubes) == 0:
             return None
 
         closest_cube = None
-        displacement = 42069    # haha
-        cubes = list(self.cubes.values())
-        for cube in cubes:
-            new_displacement = np.linalg.norm(cube.avg_pos() - target_position)
-            if closest_cube is None or new_displacement < displacement:
-                displacement = new_displacement
-                closest_cube = cube
+        displacement = 42069
+        cube_ids = list(self.cubes.keys())
+        for cube_id in cube_ids:
+            cube = self.cubes.get(cube_id)
+            if cube is None:
+                continue
 
-        if verbose:
-            print(f"Cube {closest_cube.id} closest at {np.around(closest_cube.avg_pos(), 3)}")
+            current_time = time.time()
+
+            data = cube.get_latest_data()
+            if data is None:
+                continue
+
+            timestamp, position, _, _ = data
+            new_displacement = np.linalg.norm(position - target_position)
+
+            if closest_cube is None or (new_displacement < displacement):
+                if np.abs(current_time - timestamp) < CUBE_RECENT_THRESHOLD:
+                    displacement = new_displacement
+                    closest_cube = cube
+            # if (np.abs(current_time - timestamp) < CUBE_RECENT_THRESHOLD) and\
+            #         (closest_cube is None or (new_displacement < displacement)):
+            #     displacement = new_displacement
+            #     closest_cube = cube
+            else:
+                if np.abs(current_time - timestamp) > CUBE_RECENT_THRESHOLD:
+                    print(f"Cube {cube.id} failed on time, due to {np.around(np.abs(current_time - timestamp), 3)}s!")
+
+        # TODO: remove print!
+            #print(f"Cube {cube.id} last timestamp was {np.around(np.abs(current_time - timestamp), 3)}s ago")
+        #print("got out of for loop!")
+
+        # TODO: remove
+        # if verbose:
+        #     print(f"Cube {closest_cube.id} closest at {np.around(closest_cube.avg_pos(), 3)}")
 
         return closest_cube
 
@@ -179,8 +209,8 @@ class ArucoReader:
             # create new Cube instance for new detected cube
             if id not in self.cubes.keys():
                 self.cubes[id] = Cube(id)
-            cube = self.cubes[id]
 
+            cube = self.cubes[id]
             cube.update(transform)
 
             # if cube.moving:

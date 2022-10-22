@@ -8,9 +8,14 @@ GRAB_HEIGHT = 40
 COLOR_CHECK_POS = np.array([210, -20, 300])
 # block dump position
 DUMP_POS = np.array([210, -180, 200])
-
 # robot starting position
 START_POS = np.array([0, -150, 100])
+
+# threshold for if two positions (i.e. claw and cube) are "close"
+CLOSENESS_THRESHOLD = 10
+
+# time out for moving to a cube
+TIMEOUT = 2
 
 # drop-off zones
 DROP_HEIGHT = 40

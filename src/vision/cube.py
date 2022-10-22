@@ -14,7 +14,8 @@ class Cube:
                  id,
                  cache_length=20,
                  avg_length=3,
-                 moving_threshold=15):
+                 moving_threshold=15,
+                 update_period=0.05):
         """
         Constructor
 
@@ -39,11 +40,21 @@ class Cube:
         self.avg_length = avg_length
         self.moving_threshold = moving_threshold
 
+        self.last_update_time = time.time()
+        self.update_period = update_period
+
     def update(self, transform: Transform):
+        # current_time = time.time()
+        # if current_time - self.last_update_time < self.update_period:
+        #     return
+        # else:
+        #     self.last_update_time = current_time
+
         if transform is None:
             return
 
         timestamp = time.time()
+        print(f"cube {self.id} data updated!")
 
         # scale and transform cube position to robot stationary frame
         position = numpify(transform.translation) * CAMERA_SCALE
@@ -71,11 +82,17 @@ class Cube:
         self.data['position'].append(position)
         self.data['orientation'].append(z_orientation)
         self.data['moving'].append(moving)
-        self.truncate_caches()
+        #self.truncate_caches()
 
-    def get_latest_data(self):
-        return [self.data[key][-1]
-                for key in ['timestamp', 'position', 'orientation', 'moving']]
+    def get_latest_data(self, key=None):
+        if len(self.data['timestamp']) > 0:
+            if key is not None:
+                return self.data[key][-1]
+            else:
+                return [self.data[key][-1]
+                        for key in ['timestamp', 'position', 'orientation', 'moving']]
+
+        return None
 
     def truncate_caches(self):
         for (key, val) in self.data.items():

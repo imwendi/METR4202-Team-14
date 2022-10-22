@@ -17,12 +17,10 @@ class Robot:
 
         # claw
         self.claw = None
-
         # last detected color
         self.color = None
-
         # claw controller publisher
-        self.claw_pub = rospy.Publisher(NODE_DESIRED_CLAW_POS, String)
+        self.claw_pub = rospy.Publisher(NODE_DESIRED_CLAW_POS, String, queue_size=10)
         # color subscriber
         self.color_sub = rospy.Subscriber(NODE_COLOR, String, callback=self._color_handler)
 
@@ -31,91 +29,94 @@ class Robot:
         self.claw_pub.publish(String(claw_mode))
 
     def task1(self):
-        #self.aruco_reader.reset()
-        self.set_claw('open')
+        """
+        Task 1 loop
+
+        Returns:
+
+        """
+        # exit if turntable is moving or there are no cubes
+        if self.aruco_reader.turntable_empty():
+            print("turntable empty!")
+            return -1
 
         # wait for a non-moving cube
         cube = None
         target_pos = None
         while cube is None:
-            target_position = self.motion_controller.last_position
-            cube = self.aruco_reader.get_closest(target_position, verbose=True)
+            cube = self.aruco_reader.get_closest(self.motion_controller.last_position)
 
-            if cube is not None and not cube.moving:
-                target_pos = cube.avg_pos()
-            else:
-                if cube is not None and cube.moving:
-                    print("cube moving")
+            if cube is not None:
+                target_pos = cube.get_latest_data('position')
+                if not np.any(np.isnan(target_pos)):
+                    target_pos[-1] = FOLLOW_HEIGHT
+                    self.motion_controller.move_to_pos(target_pos, ts=1)
 
-        print('target_pos ', target_pos)
-        # check target_pos is valid
-        if not target_pos is None and not np.any(np.isnan(target_pos)):
-            target_pos[-1] = FOLLOW_HEIGHT
-            self.motion_controller.move_to_pos(target_pos, ts=1)
-        else:
-            print("got here :(")
-            # delete cube from tracked cubes
-            self.aruco_reader.remove_cube(cube.id)
+        #
+        # if self.aruco_reader.turntable_moving():
+        #     print("turntable moving!")
+        #     return -1
+
+        # move to nearest block
+        # if not self.go_to_nearest_cube():
+        #     # TODO: remove
+        #     # print("failed to go to nearest")
+        #     return -1
+
+        # attempt pickup and drop off
+
+        # return to some initial position
+
+
+    def go_to_cube(self, cube):
+        """
+        Attempts to move to nearest cube
+
+        Returns: True if attempted to move robot, False is no cubes close by
+
+        """
+        # no valid cubes to move to
+        if cube is None:
+            # TODO: remove this!
+            # print("no valid cubes to go to")
             return False
 
-        if cube.moving:
-            print("cube started moving...")
-            # delete cube from tracked cubes
-            self.aruco_reader.remove_cube(cube.id)
-            return False
+        print(f"closed cube is {cube.id}!")
 
-        # ensure claw is first open
-        self.set_claw('open')
-        time.sleep(0.05)
+        # try move to cube
+        cube_position = cube.get_latest_data()[1]
+        desired_position = cube_position; desired_position[-1] = FOLLOW_HEIGHT
 
-        # move to grabbing position
-        target_pos[-1] = GRAB_HEIGHT
-        self.motion_controller.move_to_pos(target_pos, ts=1)
-        time.sleep(0.05)
+        # print(f"moving to cube {cube.id} at {desired_position}")
+        start = time.time()
+        self.motion_controller.move_to_pos(desired_position)
+        end = time.time()
+        #print(f"Took {np.around(end-start, 3)}s to get to cube {cube.id}", flush=True)
 
-        # simple feedback loop for correct claw placement
-        displacement = 42069
-        while np.linalg.norm(displacement) > 10:
-            self.motion_controller.move_to_pos(target_pos, ts=0.5)
-            displacement = self.motion_controller.last_position - target_pos
-            print(f"target_pos: {target_pos}, actual_pos: {self.motion_controller.last_position}")
+        # check if cube position was actually reached (x, y directions)
+        cube_position = cube.get_latest_data()[1]
 
-        # attempt to grab
-        self.set_claw('grip')
-        time.sleep(1.0)
+        # if np.linalg.norm(self.motion_controller.last_position - desired_position) > CLOSENESS_THRESHOLD:
+        #     print("Failed to move close to cube :(")
+        #
+        #     return False
 
-        # check color
-        self.motion_controller.move_to_pos(COLOR_CHECK_POS, ts=1)
-        time.sleep(1.0)
+        # make position micro adjustments if necessary
+        # start_time = time.time()
+        # while (time.time() - start_time < TIMEOUT):
+        #     timestamp, cube_position, _, _ = cube.get_latest_data()
+        #     desired_position = cube_position; desired_position[-1] = FOLLOW_HEIGHT
+        #
+        #     self.motion_controller.move_to_pos(desired_position)
+        #
+        #     if np.linalg.norm(current_position - desired_position) < CLOSENESS_THRESHOLD:
+        #         # gotten close enough to cube
+        #         return True
+        #
+        #     # TODO: place this earlier in loop?
+        #     current_position = self.motion_controller.last_position
 
-        color = self.aruco_reader.identify_color()
-        print(f"picked up {color} block!")
-        if color in COLOR_ZONES.keys():
-            dump_pos = COLOR_ZONES[color]
-        else:
-            # return if no correct color detected, i.e. likely cube not
-            # successfully grabbed
-            self.motion_controller.move_to_pos(START_POS, ts=1)
-            # or drop block just in case it was grabbed
-            self.set_claw('open')
-            # remove cube to re-detect its position on next iteration
-            # TODO: not needed anymore?
-            self.aruco_reader.remove_cube(cube.id)
-            return False
-
-        # move to dump zone
-        self.motion_controller.move_to_pos(dump_pos, ts=1)
-
-        # yeet cube
-        self.set_claw('open')
-        time.sleep(0.05)
-
-        # move robot to suitable height
-        dump_pos[-1] = FOLLOW_HEIGHT
-        self.motion_controller.move_to_pos(dump_pos, ts=0.5)
-
-        # delete cube from tracked cubes
-        self.aruco_reader.remove_cube(cube.id)
+        return True
 
 
     def _color_handler(self, msg: String):
