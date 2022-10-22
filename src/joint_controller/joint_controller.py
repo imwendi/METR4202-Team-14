@@ -2,6 +2,7 @@ import sys
 
 import rospy
 import numpy as np
+import time
 
 # message types
 from std_msgs.msg import Header, Float32MultiArray
@@ -12,7 +13,7 @@ from team14.msg import Pose4, IKFeedback
 # local modules
 from kinematics.kinematics import RobotKinematics
 from joint_controller.definitions import *
-from joint_controller.utils import numpify
+from joint_controller.utils import numpify, quintic_timescale
 from kinematics.utils import rot
 
 
@@ -58,12 +59,37 @@ class JointController():
                                                self._pose4_sub_handler,
                                                queue_size=10)
 
+    def move_to(self, desired_joint_angles: np.array, ts):
+        """
+        Move to desired joint angles via quintic time scaled trajectory
+
+        Args:
+            desired_joint_angles: desired joint angles
+            ts: desired elapsed time
+
+        """
+        poly_coeffs = quintic_timescale(ts)
+        initial_joint_angles = self.get_joint_angles()
+
+        start_time = time.time()
+        current_time = start_time
+        while current_time < start_time + ts:
+
+            joint_angles =\
+                initial_joint_angles +\
+                (desired_joint_angles - initial_joint_angles)\
+                * np.polyval(poly_coeffs, current_time - start_time)
+            self.publish_joint_angles(joint_angles)
+
+            time.sleep(ts/100)
+            current_time = time.time()
+
     def publish_joint_angles(self, joint_angles, velocity=None, verbose=True):
         """
         Publishes list of joint angles via self.joint_pub
 
         Args:
-            joint_angles: list of joint angles to publish [rad]
+            joint_angles: array of joint angles to publish [rad]
             velocity: array of per joint angular velocities [rad/s]
 
         """
