@@ -17,6 +17,8 @@ CAMERA_SCALE = 450 / 2.42
 # RGB color node
 NODE_RGB_COLOR = 'test_color'
 
+RECENT_INTERVAL = 1.5
+
 # colors
 RED = np.array([255, 0, 0])
 GREEN = np.array([0, 255, 0])

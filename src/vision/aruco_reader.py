@@ -53,6 +53,37 @@ class ArucoReader:
         time.sleep(2)
         self.color_map['no_cube'] = self.avg_color(5)
 
+    def turntable_empty(self):
+        """
+        Returns:
+            If a cube was recently found and its values updated
+
+        """
+        curr_time = time.time()
+        for cube in self.cubes.values():
+            timestamp, _, _, _ = cube.get_latest_data()
+            if abs(curr_time - timestamp) < RECENT_INTERVAL:
+                # turntable assumed moving if a cube has moved recently
+                return False
+
+        return True
+
+    def turntable_moving(self):
+        """
+        Returns:
+            If the turntable is moving
+
+        """
+        curr_time = time.time()
+        for cube in self.cubes.values():
+            timestamp, _, _, moving = cube.get_latest_data()
+            if abs(curr_time - timestamp) < RECENT_INTERVAL and moving:
+                # turntable assumed moving if a cube has moved recently
+                return True
+
+        return False
+
+
     def identify_color(self, avg_len=5):
         avg_color = self.avg_color(avg_len=avg_len)
 
@@ -152,10 +183,10 @@ class ArucoReader:
 
             cube.update(transform)
 
-            if cube.moving:
-                print(f"cube {cube.id} moving!")
-            else:
-                print()
+            # if cube.moving:
+            #     print(f"cube {cube.id} moving!")
+            # else:
+            #     print()
 
 
 if __name__ == '__main__':

@@ -12,9 +12,9 @@ from joint_controller.definitions import *
 class Cube:
     def __init__(self,
                  id,
-                 cache_length=10,
+                 cache_length=20,
                  avg_length=3,
-                 moving_threshold=10):
+                 moving_threshold=15):
         """
         Constructor
 
@@ -25,20 +25,25 @@ class Cube:
             moving_threshold: position delta threshold to determine if cube is moving
         """
         self.id = id
-        # cube positions
-        self.positions = []
-        # cube z orientations
-        self.orientations = []
-        # measurement timestamps
-        self.timestamps = []
+        self.color = None
+
+        # timestamped data about cube movements
+        self.data = {
+            'timestamp': [],
+            'position': [],
+            'orientation': [],
+            'moving': []
+        }
+
         self.cache_length = cache_length
         self.avg_length = avg_length
         self.moving_threshold = moving_threshold
-        self.moving = False
 
     def update(self, transform: Transform):
         if transform is None:
             return
+
+        timestamp = time.time()
 
         # scale and transform cube position to robot stationary frame
         position = numpify(transform.translation) * CAMERA_SCALE
@@ -51,35 +56,40 @@ class Cube:
         # check if moving
         pos_change = position - self.avg_pos()
         if np.linalg.norm(pos_change) > self.moving_threshold:
-            self.moving = True
-            print(f"Cube {self.id} moving!")
+            moving = True
+            # TODO: remove!
+            # print(f"Cube {self.id} moving!")
         else:
-            self.moving = False
+            moving = False
 
         # ignore invalid values
         if position is None or np.any(np.isnan(position)):
             return False
 
-        self.positions.append(position)
-        self.orientations.append(z_orientation)
-        self.timestamps.append(time.time())
+        # update data
+        self.data['timestamp'].append(timestamp)
+        self.data['position'].append(position)
+        self.data['orientation'].append(z_orientation)
+        self.data['moving'].append(moving)
+        self.truncate_caches()
 
-        # print(f"Cube {self.id}: {np.around(np.rad2deg(z_orientation), 2)} deg")
+    def get_latest_data(self):
+        return [self.data[key][-1]
+                for key in ['timestamp', 'position', 'orientation', 'moving']]
 
-        # truncate lists if needed
-        if (len(self.positions) > self.cache_length):
-            self.positions = self.positions[-self.cache_length:]
-        if (len(self.orientations) > self.cache_length):
-            self.orientations = self.orientations[-self.cache_length:]
-        if (len(self.timestamps) > self.cache_length):
-            self.timestamps = self.timestamps[-self.cache_length:]
+    def truncate_caches(self):
+        for (key, val) in self.data.items():
+            if len(val) > self.cache_length:
+                self.data[key] = val[-self.cache_length:]
+
 
     def avg_pos(self):
         """
         Returns:
             Moving average over last self.avg_pos values
         """
-        values = np.array(self.positions)[max(-self.avg_length, -len(self.positions)):-1]
+        values = np.array(self.data['position'])[max(-self.avg_length, -len(self.data['position'])):-1]
 
         # TODO: check axis!
         return np.mean(values, axis=0)
+
