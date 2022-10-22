@@ -1,3 +1,6 @@
+from ctypes import Union
+from typing import List, Optional
+
 import numpy as np
 import time
 from tf.transformations import euler_from_quaternion
@@ -73,9 +76,23 @@ class Cube:
         self.data['moving'].append(moving)
         self.truncate_caches()
 
-    def get_latest_data(self):
-        return [self.data[key][-1]
-                for key in ['timestamp', 'position', 'orientation', 'moving']]
+    def position(self):
+        if len(self.data['timestamp']) > 0:
+            timestamp = self.data['timestamp'][-1]
+            position = self.data['position'][-1]
+
+            return timestamp, position
+
+        return [None, None]
+    def get_latest_data(self, key=None):
+        if len(self.data['timestamp']) > 0:
+            if key is not None:
+                return self.data[key][-1]
+            else:
+                return [self.data[key][-1]
+                        for key in ['timestamp', 'position', 'orientation', 'moving']]
+
+        return None
 
     def truncate_caches(self):
         for (key, val) in self.data.items():
