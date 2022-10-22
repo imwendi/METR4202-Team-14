@@ -1,4 +1,5 @@
 import sys
+import time
 from typing import Union
 import pigpio
 import rospy
@@ -13,10 +14,14 @@ class ClawController():
                  grip_pos=GRIP,
                  open_pos=OPEN):
 
-        # configure PWM pin
+        # reconfigure PWM pin
         self.rpi = pigpio.pi()
         self.pin_no = pin_no
-        self.pin = self.rpi.set_mode(self.pin_no, pigpio.OUTPUT)
+        self.rpi.set_mode(self.pin_no, pigpio.INPUT)
+        time.sleep(0.5)
+        self.rpi.set_mode(self.pin_no, pigpio.OUTPUT)
+        self.rpi.set_servo_pulsewidth(self.pin_no, 0)
+        time.sleep(0.5)
 
         # set positions
         self.positions =\
@@ -45,6 +50,10 @@ class ClawController():
 
         print(f"set pulsewidth {pulsewidth}")
         self.rpi.set_servo_pulsewidth(self.pin_no, pulsewidth)
+
+        # TODO: remove this??
+        time.sleep(0.2)
+        self.rpi.set_servo_pulsewidth(self.pin_no, 0)
 
     def _claw_handler(self, String):
         pos = String.data

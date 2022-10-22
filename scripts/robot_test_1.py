@@ -18,5 +18,8 @@ if __name__ == '__main__':
         # print(f"Turntable moving: {turntable_moving}")
         # print('_'*50 + '\n')
 
-        rob.task1()
-        time.sleep(0.25)
+        turntable_empty = rob.aruco_reader.turntable_empty()
+        turntable_moving = rob.aruco_reader.turntable_moving()
+        if not turntable_empty or turntable_moving:
+            rob.task1()
+            time.sleep(0.25)

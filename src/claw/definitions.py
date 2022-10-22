@@ -3,9 +3,9 @@ CLAW_PIN = 4
 # close position
 CLOSE = 1000
 # grip position
-GRIP = 1300
+GRIP = 1200
 # open position
-OPEN = 1700
+OPEN = 1800
 
 # node for desired claw position
 NODE_DESIRED_CLAW_POS = 'desired_claw_pos'

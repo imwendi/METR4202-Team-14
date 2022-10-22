@@ -18,6 +18,7 @@ CAMERA_SCALE = 450 / 2.42
 NODE_RGB_COLOR = 'test_color'
 
 RECENT_INTERVAL = 1.5
+CUBE_TIMEOUT = 1.0
 
 # colors
 RED = np.array([255, 0, 0])

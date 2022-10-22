@@ -41,24 +41,28 @@ class Robot:
             target_position = self.motion_controller.last_position
             cube = self.aruco_reader.get_closest(target_position, verbose=True)
 
-            if cube is not None and not cube.moving:
+            if cube is not None:
                 target_pos = cube.avg_pos()
-            else:
-                if cube is not None and cube.moving:
-                    print("cube moving")
 
-        print('target_pos ', target_pos)
+            # if cube is not None and not cube.moving:
+            #     target_pos = cube.avg_pos()
+            # else:
+            #     if cube is not None and cube.moving:
+            #         #print("cube moving")
+            #         pass
+
+        #print('target_pos ', target_pos)
         # check target_pos is valid
         if not target_pos is None and not np.any(np.isnan(target_pos)):
             target_pos[-1] = FOLLOW_HEIGHT
             self.motion_controller.move_to_pos(target_pos, ts=1)
         else:
-            print("got here :(")
+            #print("got here :(")
             # delete cube from tracked cubes
             self.aruco_reader.remove_cube(cube.id)
             return False
 
-        if cube.moving:
+        if self.aruco_reader.turntable_moving():
             print("cube started moving...")
             # delete cube from tracked cubes
             self.aruco_reader.remove_cube(cube.id)
@@ -66,19 +70,19 @@ class Robot:
 
         # ensure claw is first open
         self.set_claw('open')
-        time.sleep(0.5)
+        time.sleep(0.2)
 
         # move to grabbing position
         target_pos[-1] = GRAB_HEIGHT
-        self.motion_controller.move_to_pos(target_pos, ts=2)
-        time.sleep(0.5)
+        self.motion_controller.move_to_pos(target_pos, ts=0.5)
+        time.sleep(0.1)
 
         # simple feedback loop for correct claw placement
-        displacement = 42069
-        while np.linalg.norm(displacement) > 10:
-            self.motion_controller.move_to_pos(target_pos, ts=0.5)
-            displacement = self.motion_controller.last_position - target_pos
-            print(f"target_pos: {target_pos}, actual_pos: {self.motion_controller.last_position}")
+        # displacement = 42069
+        # while np.linalg.norm(displacement) > 10:
+        #     self.motion_controller.move_to_pos(target_pos, ts=0.5)
+        #     displacement = self.motion_controller.last_position - target_pos
+        #     print(f"target_pos: {target_pos}, actual_pos: {self.motion_controller.last_position}")
 
         # attempt to grab
         # self.set_claw('open')
@@ -90,7 +94,7 @@ class Robot:
 
         # check color
         #self.set_claw('grip')
-        self.motion_controller.move_to_pos(COLOR_CHECK_POS, ts=3)
+        self.motion_controller.move_to_pos(COLOR_CHECK_POS, ts=2)
         time.sleep(1.0)
 
         color = self.aruco_reader.identify_color()

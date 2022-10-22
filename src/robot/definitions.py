@@ -1,9 +1,9 @@
 import numpy as np
 
 # z-height to go to above cube before attempting to grab it
-FOLLOW_HEIGHT = 75
+FOLLOW_HEIGHT = 85
 # z-height to grab cube at
-GRAB_HEIGHT = 45
+GRAB_HEIGHT = 50
 # position at which to check colour
 COLOR_CHECK_POS = np.array([180, -10, 330])
 # block dump position

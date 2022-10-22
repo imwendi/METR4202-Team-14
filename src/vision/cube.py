@@ -42,6 +42,7 @@ class Cube:
         self.avg_length = avg_length
         self.moving_threshold = moving_threshold
         self.moving = False
+        self.update_time = time.time()
 
     def update(self, transform: Transform):
         if transform is None:
@@ -67,6 +68,7 @@ class Cube:
             moving = False
 
         self.moving = moving
+        self.update_time = timestamp
 
         # ignore invalid values
         if position is None or np.any(np.isnan(position)):

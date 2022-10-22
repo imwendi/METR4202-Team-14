@@ -43,7 +43,7 @@ class ArucoReader:
             'blue': BLUE,
             'green': GREEN,
             'yellow': YELLOW,
-            'no_cube': np.zeros(3)
+            #'no_cube': np.ones(3) * 255
         }
 
     def reset(self):
@@ -53,16 +53,46 @@ class ArucoReader:
         time.sleep(2)
         self.color_map['no_cube'] = self.avg_color(5)
 
+    # def turntable_empty(self):
+    #     """
+    #     Returns:
+    #         If a cube was recently found and its values updated
+    #
+    #     """
+    #     curr_time = time.time()
+    #     for cube in self.cubes.values():
+    #         timestamp, _, _, _ = cube.get_latest_data()
+    #         if abs(curr_time - timestamp) < RECENT_INTERVAL:
+    #             # turntable assumed moving if a cube has moved recently
+    #             return False
+    #
+    #     return True
+    #
+    # def turntable_moving(self):
+    #     """
+    #     Returns:
+    #         If the turntable is moving
+    #
+    #     """
+    #     curr_time = time.time()
+    #     for cube in self.cubes.values():
+    #         timestamp, _, _, moving = cube.get_latest_data()
+    #         if abs(curr_time - timestamp) < RECENT_INTERVAL and moving:
+    #             # turntable assumed moving if a cube has moved recently
+    #             return True
+    #
+    #     return False
+
     def turntable_empty(self):
         """
         Returns:
             If a cube was recently found and its values updated
-
         """
         curr_time = time.time()
-        for cube in self.cubes.values():
-            timestamp, _, _, _ = cube.get_latest_data()
-            if abs(curr_time - timestamp) < RECENT_INTERVAL:
+        cubes = list(self.cubes.values())
+        for cube in cubes:
+            if abs(curr_time - cube.update_time)\
+                    < RECENT_INTERVAL:
                 # turntable assumed moving if a cube has moved recently
                 return False
 
@@ -72,12 +102,11 @@ class ArucoReader:
         """
         Returns:
             If the turntable is moving
-
         """
         curr_time = time.time()
-        for cube in self.cubes.values():
-            timestamp, _, _, moving = cube.get_latest_data()
-            if abs(curr_time - timestamp) < RECENT_INTERVAL and moving:
+        cubes = list(self.cubes.values())
+        for cube in cubes:
+            if abs(curr_time - cube.update_time) < RECENT_INTERVAL and cube.moving:
                 # turntable assumed moving if a cube has moved recently
                 return True
 
@@ -151,22 +180,31 @@ class ArucoReader:
             Cube instance for closest cube
 
         """
+        current_time = time.time()
+
         if len(self.cubes) == 0:
             return None
 
         closest_cube = None
         displacement = 42069    # haha
+        position = None
         #cubes = list(self.cubes.values())
         cube_ids = list(self.cubes.keys())
         for cube_id in cube_ids:
             cube = self.cubes[cube_id]
             new_displacement = np.linalg.norm(cube.avg_pos() - target_position)
-            if closest_cube is None or new_displacement < displacement:
-                displacement = new_displacement
-                closest_cube = cube
 
-        if verbose:
-            print(f"Cube {closest_cube.id} closest at {np.around(closest_cube.avg_pos(), 3)}")
+            print("new displacement ", new_displacement)
+            print("displacement ", displacement)
+            if not np.isnan(new_displacement) and (closest_cube is None or new_displacement < displacement):
+                if np.abs(current_time - cube.update_time) < CUBE_TIMEOUT:
+                    displacement = new_displacement
+                    closest_cube = cube
+                else:
+                    print("cube time out!")
+
+        # if verbose:
+        #     print(f"Cube {closest_cube.id} closest at {np.around(closest_cube.avg_pos(), 3)}")
 
         return closest_cube
 
