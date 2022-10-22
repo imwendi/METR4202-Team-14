@@ -38,7 +38,8 @@ class MotionController:
 
         # desired position (with time scaling) publisher
         self.time_scaled_pos_pub = rospy.Publisher(NODE_TIME_SCALED_POS,
-                                                   Position)
+                                                   Position,
+                                                   queue_size=10)
 
     def move_to_pos(self, position: np.array, ts=None):
         # ignore NaN positions

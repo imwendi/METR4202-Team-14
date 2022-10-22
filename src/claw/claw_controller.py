@@ -43,6 +43,7 @@ class ClawController():
         else:
             pulsewidth = val
 
+        print(f"set pulsewidth {pulsewidth}")
         self.rpi.set_servo_pulsewidth(self.pin_no, pulsewidth)
 
     def _claw_handler(self, String):

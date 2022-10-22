@@ -22,7 +22,7 @@ class Robot:
         self.color = None
 
         # claw controller publisher
-        self.claw_pub = rospy.Publisher(NODE_DESIRED_CLAW_POS, String)
+        self.claw_pub = rospy.Publisher(NODE_DESIRED_CLAW_POS, String, queue_size=10)
         # color subscriber
         self.color_sub = rospy.Subscriber(NODE_COLOR, String, callback=self._color_handler)
 
@@ -66,12 +66,12 @@ class Robot:
 
         # ensure claw is first open
         self.set_claw('open')
-        time.sleep(0.05)
+        time.sleep(0.5)
 
         # move to grabbing position
         target_pos[-1] = GRAB_HEIGHT
-        self.motion_controller.move_to_pos(target_pos, ts=1)
-        time.sleep(0.05)
+        self.motion_controller.move_to_pos(target_pos, ts=2)
+        time.sleep(0.5)
 
         # simple feedback loop for correct claw placement
         displacement = 42069
@@ -81,11 +81,16 @@ class Robot:
             print(f"target_pos: {target_pos}, actual_pos: {self.motion_controller.last_position}")
 
         # attempt to grab
+        # self.set_claw('open')
+        # time.sleep(0.5)
+        # self.set_claw('grip')
+        # time.sleep(0.5)
         self.set_claw('grip')
-        time.sleep(1.0)
+        time.sleep(0.5)
 
         # check color
-        self.motion_controller.move_to_pos(COLOR_CHECK_POS, ts=1)
+        #self.set_claw('grip')
+        self.motion_controller.move_to_pos(COLOR_CHECK_POS, ts=3)
         time.sleep(1.0)
 
         color = self.aruco_reader.identify_color()
@@ -98,6 +103,7 @@ class Robot:
             self.motion_controller.move_to_pos(START_POS, ts=1)
             # or drop block just in case it was grabbed
             self.set_claw('open')
+            time.sleep(0.5)
             # remove cube to re-detect its position on next iteration
             # TODO: not needed anymore?
             self.aruco_reader.remove_cube(cube.id)
@@ -108,7 +114,9 @@ class Robot:
 
         # yeet cube
         self.set_claw('open')
-        time.sleep(0.05)
+        time.sleep(0.5)
+        # self.set_claw('grip')
+        # time.sleep(0.5)
 
         # move robot to suitable height
         dump_pos[-1] = FOLLOW_HEIGHT

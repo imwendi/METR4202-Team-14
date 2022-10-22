@@ -156,8 +156,10 @@ class ArucoReader:
 
         closest_cube = None
         displacement = 42069    # haha
-        cubes = list(self.cubes.values())
-        for cube in cubes:
+        #cubes = list(self.cubes.values())
+        cube_ids = list(self.cubes.keys())
+        for cube_id in cube_ids:
+            cube = self.cubes[cube_id]
             new_displacement = np.linalg.norm(cube.avg_pos() - target_position)
             if closest_cube is None or new_displacement < displacement:
                 displacement = new_displacement

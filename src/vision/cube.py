@@ -15,7 +15,7 @@ from joint_controller.definitions import *
 class Cube:
     def __init__(self,
                  id,
-                 cache_length=20,
+                 cache_length=5,
                  avg_length=3,
                  moving_threshold=15):
         """
@@ -108,6 +108,9 @@ class Cube:
             Moving average over last self.avg_pos values
         """
         values = np.array(self.data['position'])[max(-self.avg_length, -len(self.data['position'])):-1]
+
+        if np.any(np.isnan(values)):
+            print("nan vals found for ", self.data['position'])
 
         # TODO: check axis!
         return np.mean(values, axis=0)

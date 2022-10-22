@@ -3,9 +3,9 @@ import numpy as np
 # z-height to go to above cube before attempting to grab it
 FOLLOW_HEIGHT = 75
 # z-height to grab cube at
-GRAB_HEIGHT = 40
+GRAB_HEIGHT = 45
 # position at which to check colour
-COLOR_CHECK_POS = np.array([210, -20, 300])
+COLOR_CHECK_POS = np.array([180, -10, 330])
 # block dump position
 DUMP_POS = np.array([210, -180, 200])
 
@@ -13,7 +13,7 @@ DUMP_POS = np.array([210, -180, 200])
 START_POS = np.array([0, -150, 100])
 
 # drop-off zones
-DROP_HEIGHT = 40
+DROP_HEIGHT = 45
 ZONE_1 = np.array([10, 150, DROP_HEIGHT])
 
 # center of zone 2 (-150, 50, DROP_HEIGHT) is not reachable by the robot, so
