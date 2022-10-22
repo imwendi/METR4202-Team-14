@@ -12,6 +12,7 @@ NODE_DESIRED_POS = 'desired_pose'
 NODE_DESIRED_POSE4 = 'desired_pose4'
 NODE_CURRENT_POSE = 'current_pose'
 NODE_IK_FEEDBACK = 'ik_feedback'
+NODE_TIME_SCALED_POS = 'desired_time_scaled_pos'
 
 # _________________________________ GEOMETRY ___________________________________
 # robot measurements [mm] (426 total)
@@ -37,7 +38,7 @@ VERTICAL_THRESHOLD = 10  # [mm]
 # to Dynamixels 2 and 3
 DIRECTIONAL_MULTIPLIERS = np.array([1, 1, 1, -1])
 #DEFAULT_VELOCITY = 0.5  # [rad/s]
-DEFAULT_VELOCITY = 1
+DEFAULT_VELOCITY = 3
 
 # TODO: depreciated?
 # minimum and maximum allowed dynamixel angles

@@ -8,7 +8,7 @@ import time
 from std_msgs.msg import Header, Float32MultiArray
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
-from team14.msg import Pose4, IKFeedback
+from team14.msg import Pose4, IKFeedback, Position
 
 # local modules
 from kinematics.kinematics import RobotKinematics
@@ -59,7 +59,13 @@ class JointController():
                                                self._pose4_sub_handler,
                                                queue_size=10)
 
-    def move_to(self, desired_joint_angles: np.array, ts):
+        # position subscriber for time scaled motion
+        self.time_scale_pos_sub = rospy.Subscriber(NODE_TIME_SCALED_POS,
+                                                   Position,
+                                                   self._time_scale_pos_handler,
+                                                   queue_size=10)
+
+    def move_to(self, desired_joint_angles: np.array, ts, steps_per_sec=100):
         """
         Move to desired joint angles via quintic time scaled trajectory
 
@@ -74,15 +80,15 @@ class JointController():
         start_time = time.time()
         current_time = start_time
         while current_time < start_time + ts:
-
             joint_angles =\
                 initial_joint_angles +\
                 (desired_joint_angles - initial_joint_angles)\
                 * np.polyval(poly_coeffs, current_time - start_time)
             self.publish_joint_angles(joint_angles)
 
-            time.sleep(ts/100)
+            #time.sleep(1 / steps_per_sec)
             current_time = time.time()
+
 
     def publish_joint_angles(self, joint_angles, velocity=None, verbose=True):
         """
@@ -125,6 +131,22 @@ class JointController():
         return np.array(np.flip(self.joint_state.position)) * DIRECTIONAL_MULTIPLIERS
 
     # __________________________ SUBSCRIBER HANDLERS ___________________________
+    def _time_scale_pos_handler(self, msg: Position):
+        desired_position = np.array(msg.position)
+        ts = msg.time
+
+        print('desired position: ', desired_position)
+        joint_angles, orientation = self.rk.pick_pose_from_position(desired_position)
+        if joint_angles is None:
+            self.publish_ik_feedback(desired_position, False)
+            return
+        print('chosen orientation %.3f deg' % np.rad2deg(orientation))
+        print('chosen joint angles ', joint_angles)
+
+        # create and publish JointState message
+        self.move_to(joint_angles, ts)
+        self.publish_ik_feedback(desired_position, True)
+
     def _joint_sub_handler(self, joint_state: JointState):
         """
         Joint state callback which converts joint angles to robot position
