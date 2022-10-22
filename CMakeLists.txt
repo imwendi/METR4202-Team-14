@@ -53,6 +53,7 @@ add_message_files(
   FILES
   Pose4.msg
   IKFeedback.msg
+  Position.msg
 )
 
 ## Generate services in the 'srv' folder
