@@ -26,8 +26,8 @@ ZONE_4 = np.array([10, -150, DROP_HEIGHT])
 COLOR_ZONES = {
     'blue': ZONE_1,
     'yellow': ZONE_2,
-    #'green': ZONE_3,
-    #'red': ZONE_4
+    'green': ZONE_3,
+    'red': ZONE_4
 }
 
 # color node

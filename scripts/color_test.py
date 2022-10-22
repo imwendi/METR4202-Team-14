@@ -10,6 +10,7 @@ ar = ArucoReader()
 
 
 if __name__ == '__main__':
+    #ar.calibrate_empty_color()
     while not rospy.is_shutdown():
         print('current color: ', ar.identify_color())
         time.sleep(0.1)

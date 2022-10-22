@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import time
+
 import numpy as np
 import rospy
 from joint_controller.definitions import *
@@ -44,9 +46,12 @@ class ArucoReader:
             'no_cube': np.zeros(3)
         }
 
+    def reset(self):
+        self.cubes = {}
+
     def calibrate_empty_color(self):
-        # TODO: write this!
-        pass
+        time.sleep(2)
+        self.color_map['no_cube'] = self.avg_color(5)
 
     def identify_color(self, avg_len=5):
         avg_color = self.avg_color(avg_len=avg_len)
