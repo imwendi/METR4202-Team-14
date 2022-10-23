@@ -1,5 +1,9 @@
+"""
+Simple node for controlling the SG90 servo for the claw
+
+"""
+
 import sys
-import time
 from typing import Union
 import pigpio
 import rospy
@@ -13,6 +17,15 @@ class ClawController():
                  closed_pos=CLOSE,
                  grip_pos=GRIP,
                  open_pos=OPEN):
+        """
+        Constructor
+
+        Args:
+            pin_no: servo pin number
+            closed_pos: closed position PWM value
+            grip_pos: grip position PWM value
+            open_pos: open position PWM value
+        """
 
         # reconfigure PWM pin
         self.rpi = pigpio.pi()
@@ -38,6 +51,16 @@ class ClawController():
                                          queue_size=10)
 
     def set(self, val: Union[str, float]):
+        """
+        Set servo to given position
+
+        Args:
+            val: PWM value to set or 'closed', 'grip' or 'open'
+
+        Returns:
+
+        """
+
         isopen = False
         if isinstance(val, str):
             val = val.lower()   # convert to lower case
@@ -54,12 +77,19 @@ class ClawController():
         print(f"set pulsewidth {pulsewidth}")
         self.rpi.set_servo_pulsewidth(self.pin_no, pulsewidth)
 
-        # TODO: remove this??
+        # disable pwn in open position, i.e. when servo is unused
         if isopen:
             time.sleep(0.1)
             self.rpi.set_servo_pulsewidth(self.pin_no, 0)
 
     def _claw_handler(self, String):
+        """
+        Subscriber handler for setting claw position
+
+        Args:
+            String: claw mode to set,  'closed', 'grip' or 'open'
+
+        """
         pos = String.data
         self.set(pos)
 
