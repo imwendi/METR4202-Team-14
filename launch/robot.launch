@@ -1,0 +1,54 @@
+<launch>
+    <!-- run aruco node -->
+    <include file="$(find ximea_ros)/launch/ximea_aruco.launch">
+        <arg name="serial" value="31708951" />
+    </include>
+
+    <!-- run ximea demo -->
+    <node name="ximea_demo"
+          pkg="ximea_ros"
+          type="ximea_demo"
+    />
+
+    <!-- run ximea color detect -->
+    <node name="ximea_color"
+          pkg="ximea_color"
+          type="ximea_color_detect"
+    />
+
+    <!-- run rqt image view -->
+    <node name="rqt_image_view"
+          pkg="rqt_image_view"
+          type="rqt_image_view"
+    />
+
+    <!-- run colour node -->
+    <node name="color_controller"
+          pkg="team14"
+          type="start_color_controller.py"
+    />
+
+    <!-- run dynamixel interface controller -->
+    <include file="$(find dynamixel_interface)/launch/dynamixel_interface_controller.launch"/>
+
+    <!-- run joint controller node -->
+    <node name="joint_controller"
+          pkg="team14"
+          type="start_joint_controller.py"
+    />
+
+    <!-- run claw controller node -->
+    <node name="claw_controller"
+          pkg="team14"
+          type="start_claw_controller.py"
+    />
+
+    <!-- run robot node -->
+    <node name="robot"
+          pkg="team14"
+          type="robot_test_1.py"
+    />
+
+
+
+</launch>

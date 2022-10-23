@@ -31,8 +31,8 @@
 1. Build catkin workspace
 
 ## Usage instructions
-1. Run commands under alias `start_all` in `bash_aliases.txt`
-1. Use `rosrun` to run either of the two test scripts, under the package `team14`
+1. Start `pigpiod` daemon and configure Pi memory limits. This can be done via running the shell script `setup.sh`
+2. Launch the launch file `robot.launch`
 
 ## Repo
 Github repository can be found at
