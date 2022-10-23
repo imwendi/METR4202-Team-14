@@ -26,6 +26,7 @@ L1 = 55
 L2 = 120
 L3 = 95
 L4 = 110
+
 LINK_LENGTHS = np.array([L1, L2, L3, L4])
 L = np.sum(LINK_LENGTHS)
 
