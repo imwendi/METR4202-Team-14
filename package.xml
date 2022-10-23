@@ -2,12 +2,12 @@
 <package format="2">
   <name>team14</name>
   <version>0.0.0</version>
-  <description>METR4202 Team 14 Joint Controller</description>
+  <description>METR4202 Team 14 Code</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="metr4202@todo.todo">metr4202</maintainer>
+  <maintainer email="wendi.ma@uqconnect.edu.au">metr4202</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
