@@ -45,7 +45,7 @@ class Robot:
         Assuming a cube is grapped, checks its colour and then places it down
 
         """
-        self.motion_controller.move_to_pos(COLOR_CHECK_POS, ts=1)
+        self.motion_controller.move_to_pos(COLOR_CHECK_POS, ts=0.5)
         time.sleep(1.0)
         color = self.aruco_reader.identify_color()
         print(f"picked up {color} block!")
@@ -68,9 +68,10 @@ class Robot:
         # self.set_claw('grip')
         # time.sleep(0.5)
 
-        # move robot to suitable height
-        dump_pos[-1] = FOLLOW_HEIGHT
-        self.motion_controller.move_to_pos(dump_pos, ts=0.5)
+        # move robot back to home position
+        # dump_pos[-1] = FOLLOW_HEIGHT
+        # self.motion_controller.move_to_pos(dump_pos, ts=0.5)
+        self.return_home(0.5)
 
         return True
 
@@ -224,7 +225,24 @@ class Robot:
 
         return target_pos
 
+    def return_home(self, ts=0.5):
+        """
+        Moves robot to "home" position ready for another pick up task.
 
+        Args:
+            ts: Time to take to go home
+
+        """
+        current_position = self.motion_controller.last_position
+        current_y = current_position[1]
+        if current_y > 0:
+            target_pos = ZONE_1
+        else:
+            target_pos = ZONE_4
+
+        target_pos[-1] = FOLLOW_HEIGHT
+
+        self.motion_controller.move_to_pos(target_pos, ts)
 
     def _color_handler(self, msg: String):
         self.color = msg.data

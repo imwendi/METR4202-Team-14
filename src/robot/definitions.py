@@ -14,7 +14,7 @@ DUMP_POS = np.array([210, -180, 200])
 START_POS = np.array([0, -150, 100])
 
 # time within which to try grab cube from last turntable stop [s]
-GRAB_CUBE_DURATION = 5
+GRAB_CUBE_DURATION = 7
 
 # turntable center position
 TURNTABLE_CENTER = np.array([190, 0, 0])
@@ -22,9 +22,8 @@ TURNTABLE_CENTER = np.array([190, 0, 0])
 Y_ADJUST_THRESHOLD = 40
 
 # drop-off zones
-DROP_HEIGHT = 45
+DROP_HEIGHT = 30
 ZONE_1 = np.array([10, 150, DROP_HEIGHT])
-
 # center of zone 2 (-150, 50, DROP_HEIGHT) is not reachable by the robot, so
 # we use the below alternate
 ZONE_2 = np.array([-135, 80, DROP_HEIGHT])
