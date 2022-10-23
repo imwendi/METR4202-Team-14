@@ -8,8 +8,6 @@ def intersect_connected_segments(points=List[np.array],
                                  verbose=True,
                                  skip_consecutive=False):
     """
-    #TODO: pretty inefficient, very O(n^2)
-
     Determines if a series of consecutive line segments (i.e. robot arm)
     have any self-collision.
 
@@ -33,13 +31,6 @@ def intersect_connected_segments(points=List[np.array],
         # skip consecutive
         for j in range(i + (2 if skip_consecutive else 1), num_segments):
             a2, b2 = line_segments[j]
-
-    # todo: is this needed?
-    # for i, (a1, b1) in enumerate(line_segments):
-    #     for j, (a2, b2) in enumerate(line_segments):
-    #         if i == j:
-    #             # same line
-    #             continue
 
             if intersect_2_segments(a1, a2, b1, b2):
                 # break and return on intersection found

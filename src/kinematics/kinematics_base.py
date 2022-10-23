@@ -39,29 +39,6 @@ class KinematicsBase():
                                 [1, 0, 0, 0, l0+l1+l2, 0],
                                 [1, 0, 0, 0, l0+l1+l2+l3, 0]]).T
 
-    # def ik_closest_norm(self, p, phi, thetas):
-    #     """
-    #     TODO: depreciated?
-    #
-    #     Computes inverse kinematics and selects val closest (least l1 norm)
-    #     from a given current val.
-    #
-    #     Args:
-    #         p: desired end-affector position (x, y, z)
-    #         phi: desired orientation in 3R plane TODO: for testing only
-    #         thetas: current joint angles
-    #
-    #     Returns:
-    #         new optimal val
-    #
-    #     """
-    #     new_joint_angles = self.ik(p, phi)
-    #
-    #     norm_val = np.linalg.norm(new_joint_angles - thetas.reshape((4, 1)))
-    #     pose_idx = np.argmin(norm_val, axis=-1)
-    #
-    #     return new_joint_angles[:, pose_idx]
-
     def fk(self, joint_angles) -> np.array:
         """
         Space forward kinematics for given set of joint angles
@@ -82,7 +59,7 @@ class KinematicsBase():
 
         Args:
             p: desired end-affector position (x, y, z)
-            phi: desired 3R orientation TODO: replace this with something better
+            phi: desired 3R orientation
 
         Returns:
             possible joint angles to get to p
@@ -104,36 +81,6 @@ class KinematicsBase():
                 np.concatenate((np.ones((1, 2))*_theta1, _joint_angles), axis=0)
 
         return joint_angles
-
-    # TODO: old, remove?
-    # def joint_pos_fk(self, joint_angles):
-    #     """
-    #     Forward kinematics based joint position computation
-    #
-    #     Args:
-    #         joint_angles: configuration joint angles
-    #
-    #     Returns:
-    #         list of joint coordinates in the stationary plane
-    #         [p0, p1, p2, p3, p_end], p0 is at the origin
-    #
-    #     """
-    #     joint_pos = [np.zeros(3)]*5
-    #
-    #     l1, l2, l3, l4 = self.link_lengths
-    #
-    #     # compute each positions of joints 1, 2, 3, 4, tip
-    #     M = np.eye(4)
-    #     curr_pos = np.array([0, 0, self.base_height])
-    #     for i, l in enumerate(self.link_lengths):
-    #         M[2, 3] += l
-    #         T = mr.FKinSpace(M, self.screws[:, :i+1], joint_angles[:i+1])
-    #         # joint position in home configuration
-    #         joint_pos[i+1] = apply_transform(T, curr_pos)
-    #         curr_pos[-1] += l
-    #
-    #
-    #     return joint_pos
 
     def joint_pos(self, joint_angles):
         """
@@ -203,9 +150,6 @@ class KinematicsBase():
         # pre-compute trig values
         s_phi, c_phi = np.sin(phi), np.cos(phi)
 
-        # TODO: remove
-        # print("cos val: ", c_phi)
-
         # compute possible theta2 values
         c_theta2 = (x**2 + y**2 + l3**2 - 2*l3*(c_phi*x + s_phi*y) - l1**2 - l2**2)\
                    / (2*l1*l2)
@@ -217,7 +161,7 @@ class KinematicsBase():
 
         theta1 = np.arctan2(b, a) + \
                  -options * np.arctan2(np.sqrt(a**2 + b**2 - c**2), c)
-        # equivaelent alternative computation
+        # equivalent alternative computation
         #theta1 = np.arctan2(x, y) - np.arctan2(l2*np.sin(theta2), l1 + l2*np.cos(theta2))
 
         # find all combinations of theta2, theta3 values
@@ -254,8 +198,6 @@ class KinematicsBase():
     @staticmethod
     def array_combine(a, b):
         """
-        TODO: depreciated, not used anymore
-
         Computes all combinations of values in two arrays
 
         Args:

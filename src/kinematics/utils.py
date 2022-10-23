@@ -28,6 +28,8 @@ def rot(roll, pitch, yaw):
     """
     Create rotation matrix
 
+    Originally written for METR4202 Problem Set 1 (Wendi)
+
     Args:
         roll: roll angle
         pitch: pitch angle
@@ -52,6 +54,8 @@ def rot(roll, pitch, yaw):
 def transform(pitch, roll, yaw, dx, dy, dz):
     """
     Create transformation matrix
+
+    Originally written for METR4202 Problem Set 1 (Wendi)
 
     Args:
         pitch: pitch angle
@@ -82,3 +86,11 @@ def polar2r(r, theta):
 
     """
     return np.array([r*np.cos(theta), r*np.sin(theta)])
+
+
+def get_radial_point(r, theta, height):
+    """
+    Essentially conversion from cylindrical coordinates
+
+    """
+    return np.array([*polar2r(r, theta), height])

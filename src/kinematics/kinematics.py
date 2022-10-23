@@ -42,16 +42,6 @@ class RobotKinematics(KinematicsBase):
 
         if orientation_options is None:
             orientation_options = np.concatenate([
-                # np.linspace(170, 130, 50),
-                # np.linspace(180, 70, 15),
-                # np.linspace(130, 90, 30),
-                # np.linspace(90, -180, 50)
-
-                # np.linspace(190, 160, 100),
-                # np.linspace(160, -180, 100)
-
-                # np.linspace(170, 130, 50),
-                # np.linspace(180, 70, 15),
                 np.linspace(180, 90, 50),
                 np.linspace(200, 180, 30),
                 np.linspace(90, -180, 50)
@@ -59,8 +49,6 @@ class RobotKinematics(KinematicsBase):
 
         orientation_options = np.deg2rad(orientation_options)
 
-        # TODO: delete print
-        #print(orientation_options.shape)
         for i, orientation in enumerate(orientation_options):
             print(i)
             ik_solutions = self.ik(position, orientation)
@@ -77,11 +65,14 @@ class RobotKinematics(KinematicsBase):
 
     def pick_highest_joint_2(self, ik_solution):
         """
+        Picks from multiple inverse kinematics solutions for the one with
+        the one with largest Joint 2 z height (to minimize collision risk)
 
         Args:
             ik_solution: inversion kinematics solution
 
         Returns:
+            Highest joint 2 IK solution
 
         """
         # joint positions (joint angle combination, [x, y, z] coordinate, joint number)
@@ -95,6 +86,7 @@ class RobotKinematics(KinematicsBase):
 
     def get_ik_joint_positions(self, ik_solution):
         """
+        Computes joint positions from given IK solution
 
         Args:
             ik_solution: inverse kinematics solution
@@ -173,11 +165,6 @@ class RobotKinematics(KinematicsBase):
             invalid angles removed
 
         """
-        # min_mask = (DYNAMIXEL_MIN_ANGLE < ik_solutions)
-        # max_mask = (DYNAMIXEL_MAX_ANGLE > ik_solutions)
-        #
-        # select_idx = np.logical_and(min_mask, max_mask).all(axis=0)
-
         print('dynamixel limits shape', DYNAMIXEL_ANGLE_LIMS.shape)
         print('ik_solutions shape ', ik_solutions.shape)
 
@@ -188,8 +175,6 @@ class RobotKinematics(KinematicsBase):
 
         mask = mask.all(axis=0)
 
-        # print('min_mask ', min_mask)
-        # print('max_mask ', max_mask)
         print('select_idx ', mask)
 
         ik_solutions = ik_solutions[:, mask]

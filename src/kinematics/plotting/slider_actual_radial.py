@@ -1,7 +1,7 @@
 import sys
 from matplotlib.widgets import Slider, Button
 from kinematics.kinematics import RobotKinematics
-from kinematics.path_planning import get_radial_point
+from kinematics.utils import get_radial_point
 from plotter import *
 from joint_controller.definitions import *
 
