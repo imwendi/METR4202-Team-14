@@ -14,6 +14,13 @@ class MotionController:
     def __init__(self,
                  closeness_threshold=10,
                  max_wait_time=5):
+        """
+        Constructor
+
+        Args:
+            closeness_threshold: threshold determining if two positions are close
+            max_wait_time: maximum wait time for a robot path to finish
+        """
         self.closeness_threshold = closeness_threshold
         self.max_wait_time = max_wait_time
 
@@ -42,6 +49,19 @@ class MotionController:
                                                    queue_size=10)
 
     def move_to_pos(self, position: np.array, ts=None):
+        """
+        Command robot to move to a position. Can use a quintic time scaled
+        trajectory.
+
+        Args:
+            position: Desired position
+            ts: Desired travel time for time scaled trajectory, else no time
+                scaling is used.
+
+        Returns:
+            True if the position was successfully reached
+
+        """
         # ignore NaN positions
         if (np.any(np.isnan(position))):
             return False
@@ -63,7 +83,15 @@ class MotionController:
 
 
     def _ik_feedback_handler(self, feedback: IKFeedback):
+        """
+        Callback for reading and updating IK feedback messages
+
+        """
         self.ik_feedback = (feedback.position, feedback.reachable)
 
     def _pose_sub_handler(self, T: Pose4):
+        """
+        Callback to read and update current robot pose
+
+        """
         self.last_position = np.array(T.position)

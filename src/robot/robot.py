@@ -12,8 +12,16 @@ from vision.cube import Cube
 from vision.definitions import CUBE_TIMEOUT
 
 
+"""
+High-level robot state machine class
+
+"""
 class Robot:
     def __init__(self):
+        """
+        Constructor
+
+        """
         self.motion_controller = MotionController()
         self.aruco_reader = ArucoReader()
 
@@ -32,14 +40,27 @@ class Robot:
         self.last_timetable_stop = 0
 
     def task1(self, moving_turntable=True):
+        """
+        Single iteration of task1/2
+
+        Args:
+            moving_turntable: set True to assume the turn table will be moving
+
+        """
         if moving_turntable:
             self.wait_for_turntable()
         grabbed_cube = self.grab_cube()
         if grabbed_cube is not None:
-            # a = input("type anything to continue...")
             self.sort_cube(grabbed_cube)
 
     def grab_cube(self):
+        """
+        Attempts to grab a cube.
+
+        Returns:
+            Cube object of grabbed cube, or None if not grabbed.
+
+        """
         self.set_claw('open')
 
         # wait for a non-moving cube
@@ -58,14 +79,11 @@ class Robot:
         else:
             print("got here :(")
             # delete cube from tracked cubes
-            # TODO: is this remove needed??
             self.aruco_reader.remove_cube(cube.id)
             return None
 
         # ensure claw is first open
         self.set_claw('open')
-
-        # TODO: don't need this?
         time.sleep(0.1)
 
         # check if cube has moved again
@@ -88,7 +106,10 @@ class Robot:
 
     def sort_cube(self, cube: Optional[Cube] = None):
         """
-        Assuming a cube is grabbed, checks its colour and then places it down
+        Assuming a cube is grabbed, checks its colour and then places it down.
+
+        Args:
+            cube: grabbed cube to sort
 
         """
         start_time = time.time()
@@ -125,6 +146,15 @@ class Robot:
         return True
 
     def wait_for_turntable(self):
+        """
+        Blocks and continuously checking turntable until it has stopped with
+        sufficient time for tasks to be done.
+
+        Returns:
+            True if turntable is immobile with sufficient remaining time before
+            next rotation cycle.
+
+        """
         while True:
             current_time = time.time()
             turntable_moving = self.aruco_reader.turntable_moving()
@@ -145,18 +175,24 @@ class Robot:
                 return True
 
     def set_claw(self, claw_mode):
+        """
+        Publish desired claw mode
+
+        Args:
+            claw_mode: desired mode to set
+
+        """
         self.claw_pub.publish(String(claw_mode))
-
-
 
     def adjust_follow_pos(self, target_pos):
         """
         Adjusts follow target position if cube is relatively far from turntable center.
 
         Args:
-            target_pos:
+            target_pos: initial target position
 
         Returns:
+            adjusted target position
 
         """
         displacement = target_pos - TURNTABLE_CENTER
@@ -177,9 +213,10 @@ class Robot:
         Adjusts grab target position if cube is relatively far from turntable center.
 
         Args:
-            target_pos:
+            target_pos: initial target position
 
         Returns:
+            adjusted target position
 
         """
         displacement = target_pos - TURNTABLE_CENTER
@@ -219,6 +256,10 @@ class Robot:
         self.motion_controller.move_to_pos(target_pos, ts)
 
     def _color_handler(self, msg: String):
+        """
+        Callback to update about current camera detected color
+
+        """
         self.color = msg.data
 
 
