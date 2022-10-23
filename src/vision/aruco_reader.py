@@ -43,50 +43,14 @@ class ArucoReader:
             'blue': BLUE,
             'green': GREEN,
             'yellow': YELLOW,
-            #'no_cube': np.ones(3) * 255
         }
-
-    def reset(self):
-        self.cubes = {}
-
-    def calibrate_empty_color(self):
-        time.sleep(2)
-        self.color_map['no_cube'] = self.avg_color(5)
-
-    # def turntable_empty(self):
-    #     """
-    #     Returns:
-    #         If a cube was recently found and its values updated
-    #
-    #     """
-    #     curr_time = time.time()
-    #     for cube in self.cubes.values():
-    #         timestamp, _, _, _ = cube.get_latest_data()
-    #         if abs(curr_time - timestamp) < RECENT_INTERVAL:
-    #             # turntable assumed moving if a cube has moved recently
-    #             return False
-    #
-    #     return True
-    #
-    # def turntable_moving(self):
-    #     """
-    #     Returns:
-    #         If the turntable is moving
-    #
-    #     """
-    #     curr_time = time.time()
-    #     for cube in self.cubes.values():
-    #         timestamp, _, _, moving = cube.get_latest_data()
-    #         if abs(curr_time - timestamp) < RECENT_INTERVAL and moving:
-    #             # turntable assumed moving if a cube has moved recently
-    #             return True
-    #
-    #     return False
 
     def turntable_empty(self):
         """
         Returns:
             If a cube was recently found and its values updated
+            i.e. if the turntable has at least one cube on it and is not empty
+
         """
         curr_time = time.time()
         cubes = list(self.cubes.values())
@@ -146,12 +110,13 @@ class ArucoReader:
 
     def avg_color(self, avg_len=5):
         """
-
+        Computes average historical RGB color
 
         Args:
-            avg_len:
+            avg_len: number of historical values over which to take average
 
         Returns:
+            Average RGB color
 
         """
         values = np.array(self.color_cache)[max(-avg_len, -len(self.color_cache)):-1]
@@ -159,17 +124,18 @@ class ArucoReader:
         return np.mean(values, axis=0)
 
     def _process_color(self, rgb_color: ColorRGBA):
+        """
+        Callback to save latest Ximea RGB color node data to RGB
+
+        """
         color = np.array([rgb_color.r, rgb_color.g, rgb_color.b])
         self.color_cache.append(color)
-
-        # TODO: remove
-        # print("added color ", color)
 
         # truncate list if needed
         if len(self.color_cache) > self.color_cache_len:
             self.color_cache = self.color_cache[-self.color_cache_len:]
 
-    def get_closest(self, target_position: np.array, verbose=False):
+    def get_closest(self, target_position: np.array):
         """
         Finds cube closest to a target position
 
@@ -196,22 +162,32 @@ class ArucoReader:
 
             print("new displacement ", new_displacement)
             print("displacement ", displacement)
-            if not np.isnan(new_displacement) and (closest_cube is None or new_displacement < displacement):
+            if not np.isnan(new_displacement) and\
+                    (closest_cube is None or new_displacement < displacement):
                 if np.abs(current_time - cube.update_time) < CUBE_TIMEOUT:
                     displacement = new_displacement
                     closest_cube = cube
                 else:
                     print("cube time out!")
 
-        # if verbose:
-        #     print(f"Cube {closest_cube.id} closest at {np.around(closest_cube.avg_pos(), 3)}")
-
         return closest_cube
 
     def remove_cube(self, id):
+        """
+        Remove a stored cube's data
+
+        Args:
+            id: ID of cube to remove
+
+        """
         self.cubes.pop(id)
 
     def _process_fiducials(self, fid_array: FiducialTransformArray):
+        """
+        Callback for updating self.cubes data from new Fiducial array data
+        from the camera
+
+        """
         for fid_transform in fid_array.transforms:
             id = fid_transform.fiducial_id
             transform = fid_transform.transform
@@ -223,10 +199,12 @@ class ArucoReader:
 
             cube.update(transform)
 
-            # if cube.moving:
-            #     print(f"cube {cube.id} moving!")
-            # else:
-            #     print()
+    def reset(self):
+        """
+        Resets all stored cube data
+
+        """
+        self.cubes = {}
 
 
 if __name__ == '__main__':

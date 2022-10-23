@@ -19,13 +19,30 @@ class ColorNode:
 
     """
     def __init__(self, serial):
+        """
+        Constructor
+
+        Args:
+            serial: camera serial number
+        """
         self.bridge = CvBridge()
         self.serial = serial
-        self.image_sub = rospy.Subscriber(f"/ximea_ros/ximea_{self.serial}/image_raw", Image, self._img_handler)
-        self.color_pub = rospy.Publisher("/test_color", ColorRGBA, queue_size=10)
-        self.color_sub = rospy.Subscriber(f"/detected_color", String, self._color_handler)
+        self.image_sub =\
+            rospy.Subscriber(f"/ximea_ros/ximea_{self.serial}/image_raw",
+                             Image,
+                             self._img_handler)
+        self.color_pub = rospy.Publisher("/test_color",
+                                         ColorRGBA,
+                                         queue_size=10)
+        self.color_sub = rospy.Subscriber(f"/detected_color",
+                                          String,
+                                          self._color_handler)
 
     def _img_handler(self, data):
+        """
+        Callback to convert detected color to RGB and publish it
+
+        """
         global img
         try:
             img = self.bridge.imgmsg_to_cv2(data, "bgr8")
@@ -41,4 +58,8 @@ class ColorNode:
         self.color_pub.publish(color)
 
     def _color_handler(self, data):
+        """
+        Color callback
+
+        """
         print('subscribed color: ', data)

@@ -12,6 +12,10 @@ from kinematics.utils import apply_transform
 from joint_controller.definitions import *
 
 
+"""
+Class used to store data about a single cube
+
+"""
 class Cube:
     def __init__(self,
                  id,
@@ -45,6 +49,10 @@ class Cube:
         self.update_time = time.time()
 
     def update(self, transform: Transform):
+        """
+        Callback to update cube pose data from a transform message
+
+        """
         if transform is None:
             return
 
@@ -54,6 +62,7 @@ class Cube:
         position = numpify(transform.translation) * CAMERA_SCALE
         position = apply_transform(T_ROBOT_CAM, position)
 
+        # extract rotation
         quaternion = numpify(transform.rotation)
         euler_angles = euler_from_quaternion(quaternion)
         z_orientation = euler_angles[-1]
@@ -62,8 +71,6 @@ class Cube:
         pos_change = position - self.avg_pos()
         if np.linalg.norm(pos_change) > self.moving_threshold:
             moving = True
-            # TODO: remove!
-            # print(f"Cube {self.id} moving!")
         else:
             moving = False
 
@@ -82,6 +89,11 @@ class Cube:
         self.truncate_caches()
 
     def position(self):
+        """
+        Returns:
+            latest cube timestamp and position
+
+        """
         if len(self.data['timestamp']) > 0:
             timestamp = self.data['timestamp'][-1]
             position = self.data['position'][-1]
@@ -89,7 +101,16 @@ class Cube:
             return timestamp, position
 
         return [None, None]
+
     def get_latest_data(self, key=None):
+        """
+        Args:
+            key: key of parameter to extract, else all returned
+
+        Returns:
+            Data corresponding to latest update timestamp
+
+        """
         if len(self.data['timestamp']) > 0:
             if key is not None:
                 return self.data[key][-1]
@@ -100,6 +121,10 @@ class Cube:
         return None
 
     def truncate_caches(self):
+        """
+        Truncates cached data lengths
+
+        """
         for (key, val) in self.data.items():
             if len(val) > self.cache_length:
                 self.data[key] = val[-self.cache_length:]
@@ -108,12 +133,12 @@ class Cube:
         """
         Returns:
             Moving average over last self.avg_pos values
+
         """
-        values = np.array(self.data['position'])[max(-self.avg_length, -len(self.data['position'])):-1]
+        values = np.array(self.data['position'])[max(-self.avg_length,
+                                                     -len(self.data['position'])):-1]
 
         if np.any(np.isnan(values)):
             print("nan vals found for ", self.data['position'])
 
-        # TODO: check axis!
         return np.mean(values, axis=0)
-
