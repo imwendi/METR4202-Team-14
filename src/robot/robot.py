@@ -31,6 +31,12 @@ class Robot:
         self.claw_pub.publish(String(claw_mode))
 
     def task1(self):
+        self.task1_old()
+
+    def wait_for_turntable(self):
+        pass
+
+    def task1_old(self):
         #self.aruco_reader.reset()
         self.set_claw('open')
 
