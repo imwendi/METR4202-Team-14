@@ -3,7 +3,7 @@ import numpy as np
 # z-height to go to above cube before attempting to grab it
 FOLLOW_HEIGHT = 80
 # z-height to grab cube at
-GRAB_HEIGHT = 55
+GRAB_HEIGHT = 50
 
 # position at which to check colour
 COLOR_CHECK_POS = np.array([180, -10, 330])
@@ -14,7 +14,7 @@ DUMP_POS = np.array([210, -180, 200])
 START_POS = np.array([0, -150, 100])
 
 # time within which to try grab cube from last turntable stop [s]
-GRAB_CUBE_DURATION = 3
+GRAB_CUBE_DURATION = 5
 
 # turntable center position
 TURNTABLE_CENTER = np.array([190, 0, 0])

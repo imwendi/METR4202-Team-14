@@ -31,9 +31,11 @@ class Robot:
     def set_claw(self, claw_mode):
         self.claw_pub.publish(String(claw_mode))
 
-    def task1(self):
-        self.wait_for_turntable()
+    def task1(self, moving_turntable=True):
+        if moving_turntable:
+            self.wait_for_turntable()
         if self.task1_old():
+            # a = input("type anything to continue...")
             self.sort_cube()
 
 
@@ -108,12 +110,14 @@ class Robot:
             if cube is not None:
                 target_pos = cube.avg_pos()
 
-        print('target_pos ', target_pos)
+        # TODO: save target z position
+        target_z = target_pos[-1]
+
         # check target_pos is valid
         if not target_pos is None and not np.any(np.isnan(target_pos)):
             # TODO: replace with adjust?
             #target_pos[-1] = FOLLOW_HEIGHT
-            target_pos = self.adjust_target_pos(target_pos)
+            target_pos = self.adjust_follow_pos(target_pos)
             self.motion_controller.move_to_pos(target_pos, ts=1)
         else:
             print("got here :(")
@@ -134,7 +138,7 @@ class Robot:
         time.sleep(0.1)
 
         # move to grabbing position
-        target_pos[-1] = GRAB_HEIGHT
+        target_pos = self.adjust_grab_pos(target_pos)
         self.motion_controller.move_to_pos(target_pos, ts=0.2)
         time.sleep(0.1)
 
@@ -157,9 +161,9 @@ class Robot:
         return True
 
 
-    def adjust_target_pos(self, target_pos):
+    def adjust_follow_pos(self, target_pos):
         """
-        Adjusts target position if cube is relatively far from turntable center.
+        Adjusts follow target position if cube is relatively far from turntable center.
 
         Args:
             target_pos:
@@ -168,10 +172,10 @@ class Robot:
 
         """
         displacement = target_pos - TURNTABLE_CENTER
-        y_displacement = displacement[1]
+        x_displacement, y_displacement = displacement[:2]
 
         if np.abs(y_displacement) > Y_ADJUST_THRESHOLD:
-            target_pos[1] += 5*np.sign(y_displacement)
+            target_pos[1] += 8*np.sign(y_displacement)
             print("adjusted Y!")
         else:
             print("Y displacement was just ", y_displacement)
@@ -189,6 +193,34 @@ class Robot:
         #     print("radial displacement was just %.3f" % displacement_norm)
         #
         # target_pos[-1] = FOLLOW_HEIGHT
+
+        return target_pos
+
+
+    def adjust_grab_pos(self, target_pos):
+        """
+        Adjusts grab target position if cube is relatively far from turntable center.
+
+        Args:
+            target_pos:
+
+        Returns:
+
+        """
+        displacement = target_pos - TURNTABLE_CENTER
+        x_displacement = displacement[0]
+
+        target_pos[-1] = GRAB_HEIGHT
+
+        if np.abs(x_displacement) > Y_ADJUST_THRESHOLD:
+            target_pos[-1] += 8*np.sign(x_displacement)
+
+            target_pos[0] += 5*np.sign(x_displacement)
+
+            print(f"adjusted X, Z by {5*np.sign(x_displacement)}!")
+            print("X displacement was ", x_displacement)
+        else:
+            print("X displacement was just", x_displacement)
 
         return target_pos
 
