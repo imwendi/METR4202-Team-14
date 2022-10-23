@@ -15,12 +15,7 @@ NODE_IK_FEEDBACK = 'ik_feedback'
 NODE_TIME_SCALED_POS = 'desired_time_scaled_pos'
 
 # _________________________________ GEOMETRY ___________________________________
-# robot measurements [mm] (426 total)
-# BASE_HEIGHT = 47
-# L1 = 54
-# L2 = 117
-# L3 = 95
-# L4 = 105
+# robot measurements [mm]
 BASE_HEIGHT = 46
 L1 = 55
 L2 = 120
@@ -40,11 +35,6 @@ VERTICAL_THRESHOLD = 10  # [mm]
 DIRECTIONAL_MULTIPLIERS = np.array([1, 1, 1, -1])
 #DEFAULT_VELOCITY = 0.5  # [rad/s]
 DEFAULT_VELOCITY = 3
-
-# TODO: depreciated?
-# minimum and maximum allowed dynamixel angles
-# DYNAMIXEL_MIN_ANGLE = np.deg2rad(-145)
-# DYNAMIXEL_MAX_ANGLE = np.deg2rad(145)
 
 # relatively conservative angle limits
 DYNAMIXEL_ANGLE_LIMS = np.deg2rad(np.array([150, 140, 140, 100])).reshape((4, 1))

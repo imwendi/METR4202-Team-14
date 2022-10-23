@@ -18,6 +18,11 @@ from kinematics.utils import rot
 
 
 class JointController():
+    """
+    Overall class for handling moving robot to a desired pose by computing
+    required inverse kinematics and then sending Dynamixel commands.
+
+    """
     def __init__(self, base_height=None, link_lengths=None):
         # configure RobotKinematics computation class
         self.base_height = BASE_HEIGHT if base_height is None else base_height
@@ -65,7 +70,7 @@ class JointController():
                                                    self._time_scale_pos_handler,
                                                    queue_size=10)
 
-    def move_to(self, desired_joint_angles: np.array, ts, steps_per_sec=100):
+    def move_to(self, desired_joint_angles: np.array, ts):
         """
         Move to desired joint angles via quintic time scaled trajectory
 
@@ -86,9 +91,7 @@ class JointController():
                 * np.polyval(poly_coeffs, current_time - start_time)
             self.publish_joint_angles(joint_angles)
 
-            #time.sleep(1 / steps_per_sec)
             current_time = time.time()
-
 
     def publish_joint_angles(self, joint_angles, velocity=None, verbose=True):
         """
@@ -132,6 +135,13 @@ class JointController():
 
     # __________________________ SUBSCRIBER HANDLERS ___________________________
     def _time_scale_pos_handler(self, msg: Position):
+        """
+        callback to move to a position via time scaled trajectory
+
+        Args:
+            msg: message containing desired end position and travel time
+
+        """
         desired_position = np.array(msg.position)
         ts = msg.time
 
@@ -166,10 +176,27 @@ class JointController():
         self.pose_pub.publish(pose_msg, phi)
 
     def publish_ik_feedback(self, position: np.array, reachable: bool):
+        """
+        Publishes a message stating if a requested position is reachable by the robot
+
+        Args:
+            position: position
+            reachable: if the position is reachable via IK
+
+        """
         msg = IKFeedback(position, reachable)
         self.ik_feedback_pub.publish(msg)
 
     def _pose_sub_handler(self, pose: Pose):
+        """
+        Pose callback which computes inverse kinematics for the given pose and
+        tries to move the robot to that pose.
+
+        Args:
+            pose: desired pose
+
+        """
+
         desired_position = numpify(pose.position)
 
         print('desired position: ', desired_position)
@@ -190,6 +217,14 @@ class JointController():
         self.publish_ik_feedback(desired_position, True)
 
     def _pose4_sub_handler(self, msg: Pose4):
+        """
+        Pose4 callback which computes inverse kinematics for the given pose4 and
+        tries to move the robot to that pose.
+
+        Args:
+            msg: desired pose4 (position and end effector orientation)
+
+        """
         print('msg.position ', msg.position)
         position = np.array(msg.position)
         print(f"moving to position {position}, orientation {np.deg2rad(msg.orientation)} deg\n")
@@ -206,13 +241,10 @@ class JointController():
             return
 
         # select optimal solution
-        # TODO: in future, this will be replaced by object collision avoidance things
         joint_angles = self.rk.pick_highest_joint_2(ik_solution)
 
-        # TODO: don't need this check anymore?
         if np.isnan(joint_angles).any():
             print("ignored NaN angles", file=sys.stderr)
             return
 
-        # TODO: change to auto select joint angles
         self.publish_joint_angles(joint_angles, velocity=np.ones(4)*0.25)
