@@ -172,6 +172,69 @@ class ArucoReader:
 
         return closest_cube
 
+    def get_closest_orientation(self):
+        """
+        Finds cube with orientation closest to a target position
+
+        Returns:
+            Cube instance for closest cube
+
+        """
+        current_time = time.time()
+
+        if len(self.cubes) == 0:
+            return None
+
+        closest_cube = None
+        orientation_difference = 42069    # haha
+        chosen_cube_orientation = None
+        chosen_robot_orientation = None
+
+        cube_ids = list(self.cubes.keys())
+        for cube_id in cube_ids:
+            cube = self.cubes[cube_id]
+            cube_position = cube.avg_pos()
+
+            if cube_position is None or np.any(np.isnan(cube_position)):
+                return None
+
+            required_robot_orientation = self.unwrap_to_90(np.arctan2(
+               cube_position[1], cube_position[0]))
+            cube_orientation = self.unwrap_to_90(cube.orientation)
+
+            # unwrapping large value further unwrapping
+            if cube_orientation > np.deg2rad(80):
+                cube_orientation = np.pi / 2 - cube_orientation
+
+            if required_robot_orientation > np.deg2rad(80):
+                required_robot_orientation = np.pi / 2 - required_robot_orientation
+
+            new_orientation_difference = np.abs(required_robot_orientation - cube_orientation)
+
+            if (closest_cube is None or new_orientation_difference < orientation_difference):
+                if np.abs(current_time - cube.update_time) < CUBE_TIMEOUT:
+                    orientation_difference = new_orientation_difference
+                    closest_cube = cube
+
+                    chosen_cube_orientation = cube_orientation
+                    chosen_robot_orientation = required_robot_orientation
+                else:
+                    print("cube time out!")
+
+        if closest_cube is not None:
+            print(f"Chosen Cube {closest_cube.id}")
+            print(f"cube orientation {np.rad2deg(chosen_cube_orientation)}")
+            print(f"robot orientation {np.rad2deg(chosen_robot_orientation)}")
+
+
+        return closest_cube
+
+    def unwrap_to_90(self, angle):
+        return angle - np.floor(angle / (np.pi / 2)) * np.pi / 2
+
+    # def unwrap_to_90(self, angle):
+    #     return angle - np.floor(angle / (np.pi / 2)) * np.pi / 2
+
     def remove_cube(self, id):
         """
         Remove a stored cube's data

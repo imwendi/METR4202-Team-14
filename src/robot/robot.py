@@ -68,7 +68,9 @@ class Robot:
         target_pos = None
         while cube is None:
             target_position = self.motion_controller.last_position
-            cube = self.aruco_reader.get_closest(target_position, verbose=True)
+            # TODO: still needed?
+            # cube = self.aruco_reader.get_closest(target_position)
+            cube = self.aruco_reader.get_closest_orientation()
             if cube is not None:
                 target_pos = cube.avg_pos()
 
@@ -140,7 +142,7 @@ class Robot:
 
         # yeet cube
         self.set_claw('open')
-        time.sleep(0.1)
+        time.sleep(0.5)
         self.return_home(0.5)
 
         return True

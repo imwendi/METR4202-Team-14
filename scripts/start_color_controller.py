@@ -7,3 +7,4 @@ colornode = ColorNode(CAMERA_ID)
 
 if __name__ == '__main__':
     rospy.spin()
+    

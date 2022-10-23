@@ -16,6 +16,10 @@
 - `numpy`
 - `matplotlib`
 - `modern_robotics`
+- Standard ROS libraries
+  - `rospy`
+  - Various messages
+  - `tf.transformations`
 - Requires running ROS nodes from
     - Dynamixel interface (https://github.com/UQ-METR4202/dynamixel_interface)
     - Ximea ROS (https://github.com/UQ-METR4202/metr4202_ximea_ros)

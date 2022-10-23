@@ -9,6 +9,7 @@ import pigpio
 import rospy
 from std_msgs.msg import String
 from claw.definitions import *
+import time
 
 
 class ClawController():

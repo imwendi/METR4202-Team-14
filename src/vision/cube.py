@@ -47,6 +47,7 @@ class Cube:
         self.moving_threshold = moving_threshold
         self.moving = False
         self.update_time = time.time()
+        self.orientation = 0
 
     def update(self, transform: Transform):
         """
@@ -76,6 +77,7 @@ class Cube:
 
         self.moving = moving
         self.update_time = timestamp
+        self.orientation = z_orientation
 
         # ignore invalid values
         if position is None or np.any(np.isnan(position)):
