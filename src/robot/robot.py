@@ -17,24 +17,45 @@ class Robot:
 
         # claw
         self.claw = None
-
         # last detected color
         self.color = None
-
         # claw controller publisher
         self.claw_pub = rospy.Publisher(NODE_DESIRED_CLAW_POS, String, queue_size=10)
         # color subscriber
         self.color_sub = rospy.Subscriber(NODE_COLOR, String, callback=self._color_handler)
+
+        # if last detected timetable state was moving
+        self.turntable_moving = False
+        # last detection timetable stop time
+        self.last_timetable_stop = 0
 
 
     def set_claw(self, claw_mode):
         self.claw_pub.publish(String(claw_mode))
 
     def task1(self):
-        self.task1_old()
+        self.wait_for_turntable()
+        #self.task1_old()
 
     def wait_for_turntable(self):
-        pass
+        while True:
+            current_time = time.time()
+            turntable_moving = self.aruco_reader.turntable_moving()
+
+            if turntable_moving and not self.turntable_moving:
+                # turntable started moving again
+                print("turntable started moving!")
+            elif not turntable_moving and self.turntable_moving:
+                # turntable just stopped
+                self.last_timetable_stop = current_time
+                print("turntable just stopped!")
+
+            self.turntable_moving = turntable_moving
+
+            time_past_last_stop = np.abs(current_time - self.last_timetable_stop)
+            if not turntable_moving and time_past_last_stop < GRAB_CUBE_DURATION:
+                print("%.3fs left to grab cube" % (GRAB_CUBE_DURATION - time_past_last_stop))
+
 
     def task1_old(self):
         #self.aruco_reader.reset()

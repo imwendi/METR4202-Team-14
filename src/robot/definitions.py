@@ -12,6 +12,9 @@ DUMP_POS = np.array([210, -180, 200])
 # robot starting position
 START_POS = np.array([0, -150, 100])
 
+# time within which to try grab cube from last turntable stop [s]
+GRAB_CUBE_DURATION = 3
+
 # drop-off zones
 DROP_HEIGHT = 45
 ZONE_1 = np.array([10, 150, DROP_HEIGHT])
