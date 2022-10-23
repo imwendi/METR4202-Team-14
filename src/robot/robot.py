@@ -35,7 +35,7 @@ class Robot:
 
     def task1(self):
         self.wait_for_turntable()
-        #self.task1_old()
+        self.task1_old()
 
     def wait_for_turntable(self):
         while True:
@@ -54,7 +54,9 @@ class Robot:
 
             time_past_last_stop = np.abs(current_time - self.last_timetable_stop)
             if not turntable_moving and time_past_last_stop < GRAB_CUBE_DURATION:
-                print("%.3fs left to grab cube" % (GRAB_CUBE_DURATION - time_past_last_stop))
+                # enough time to try grab cube
+                #print("%.3fs left to grab cube" % (GRAB_CUBE_DURATION - time_past_last_stop))
+                return True
 
 
     def task1_old(self):
