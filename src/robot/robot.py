@@ -120,7 +120,9 @@ class Robot:
         #print('target_pos ', target_pos)
         # check target_pos is valid
         if not target_pos is None and not np.any(np.isnan(target_pos)):
-            target_pos[-1] = FOLLOW_HEIGHT
+            # TODO: replace with adjust?
+            #target_pos[-1] = FOLLOW_HEIGHT
+            target_pos = self.adjust_target_pos(target_pos)
             self.motion_controller.move_to_pos(target_pos, ts=1)
         else:
             #print("got here :(")
@@ -162,6 +164,30 @@ class Robot:
         #self.aruco_reader.remove_cube(cube.id)
 
         return True
+
+
+    def adjust_target_pos(self, target_pos):
+        """
+        Adjusts target position if cube is relatively far from turntable center.
+
+        Args:
+            target_pos:
+
+        Returns:
+
+        """
+        displacement = target_pos - TURNTABLE_CENTER
+        y_displacement = displacement[1]
+
+        if np.abs(y_displacement) > Y_ADJUST_THRESHOLD:
+            target_pos[1] += 10*np.sign(y_displacement)
+            print("adjusted Y!")
+        else:
+            print("Y displacement was just ", y_displacement)
+
+        target_pos[-1] = FOLLOW_HEIGHT
+
+        return target_pos
 
 
 

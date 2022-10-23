@@ -15,6 +15,11 @@ START_POS = np.array([0, -150, 100])
 # time within which to try grab cube from last turntable stop [s]
 GRAB_CUBE_DURATION = 3
 
+# turntable center position
+TURNTABLE_CENTER = np.array([190, 0, 0])
+# y displacement adjustment threshold
+Y_ADJUST_THRESHOLD = 40
+
 # drop-off zones
 DROP_HEIGHT = 45
 ZONE_1 = np.array([10, 150, DROP_HEIGHT])
