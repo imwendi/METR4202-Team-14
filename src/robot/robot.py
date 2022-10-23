@@ -35,7 +35,44 @@ class Robot:
 
     def task1(self):
         self.wait_for_turntable()
-        self.task1_old()
+        if self.task1_old():
+            self.sort_cube()
+
+
+
+    def sort_cube(self):
+        """
+        Assuming a cube is grapped, checks its colour and then places it down
+
+        """
+        self.motion_controller.move_to_pos(COLOR_CHECK_POS, ts=1)
+        time.sleep(1.0)
+        color = self.aruco_reader.identify_color()
+        print(f"picked up {color} block!")
+        if color in COLOR_ZONES.keys():
+            dump_pos = COLOR_ZONES[color]
+        else:
+            # return if no correct color detected, i.e. likely cube not
+            # successfully grabbed
+            self.motion_controller.move_to_pos(START_POS, ts=1)
+            # or drop block just in case it was grabbed
+            self.set_claw('open')
+            return False
+
+        # move to dump zone
+        self.motion_controller.move_to_pos(dump_pos, ts=1)
+
+        # yeet cube
+        self.set_claw('open')
+        time.sleep(0.1)
+        # self.set_claw('grip')
+        # time.sleep(0.5)
+
+        # move robot to suitable height
+        dump_pos[-1] = FOLLOW_HEIGHT
+        self.motion_controller.move_to_pos(dump_pos, ts=0.5)
+
+        return True
 
     def wait_for_turntable(self):
         while True:
@@ -88,13 +125,13 @@ class Robot:
         else:
             #print("got here :(")
             # delete cube from tracked cubes
-            self.aruco_reader.remove_cube(cube.id)
+            #self.aruco_reader.remove_cube(cube.id)
             return False
 
         if self.aruco_reader.turntable_moving():
             print("cube started moving...")
             # delete cube from tracked cubes
-            self.aruco_reader.remove_cube(cube.id)
+            #self.aruco_reader.remove_cube(cube.id)
             return False
 
         # ensure claw is first open
@@ -122,42 +159,10 @@ class Robot:
 
         # check color
         #self.set_claw('grip')
-        self.motion_controller.move_to_pos(COLOR_CHECK_POS, ts=1)
-        time.sleep(1.0)
+        #self.aruco_reader.remove_cube(cube.id)
 
-        color = self.aruco_reader.identify_color()
-        print(f"picked up {color} block!")
-        if color in COLOR_ZONES.keys():
-            dump_pos = COLOR_ZONES[color]
-        else:
-            # return if no correct color detected, i.e. likely cube not
-            # successfully grabbed
-            self.motion_controller.move_to_pos(START_POS, ts=1)
-            # or drop block just in case it was grabbed
-            self.set_claw('open')
+        return True
 
-            # TODO: dont need this?
-            #time.sleep(0.5)
-            # remove cube to re-detect its position on next iteration
-            # TODO: not needed anymore?
-            self.aruco_reader.remove_cube(cube.id)
-            return False
-
-        # move to dump zone
-        self.motion_controller.move_to_pos(dump_pos, ts=1)
-
-        # yeet cube
-        self.set_claw('open')
-        time.sleep(0.1)
-        # self.set_claw('grip')
-        # time.sleep(0.5)
-
-        # move robot to suitable height
-        dump_pos[-1] = FOLLOW_HEIGHT
-        self.motion_controller.move_to_pos(dump_pos, ts=0.5)
-
-        # delete cube from tracked cubes
-        self.aruco_reader.remove_cube(cube.id)
 
 
     def _color_handler(self, msg: String):
