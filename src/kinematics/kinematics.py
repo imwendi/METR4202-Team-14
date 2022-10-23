@@ -50,9 +50,11 @@ class RobotKinematics(KinematicsBase):
                 # np.linspace(190, 160, 100),
                 # np.linspace(160, -180, 100)
 
+                # np.linspace(170, 130, 50),
+                # np.linspace(180, 70, 15),
                 np.linspace(180, 90, 50),
-                np.linspace(230, 180, 30),
-                np.linspace(90, 180, 50)
+                np.linspace(200, 180, 30),
+                np.linspace(90, -180, 50)
             ])
 
         orientation_options = np.deg2rad(orientation_options)

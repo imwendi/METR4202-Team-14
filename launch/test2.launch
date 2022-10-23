@@ -1,8 +1,4 @@
 <launch>
-
-<!--    &lt;!&ndash; set memory limits and start pigpiod &ndash;&gt;-->
-<!--    <node name="sudo_setup" pkg="team14" type="setup.sh" launch-prefix="sudo"/>-->
-
     <!-- run aruco node -->
     <include file="$(find ximea_ros)/launch/ximea_aruco.launch">
         <arg name="serial" value="31708951" />

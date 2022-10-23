@@ -38,10 +38,13 @@ class ClawController():
                                          queue_size=10)
 
     def set(self, val: Union[str, float]):
+        isopen = False
         if isinstance(val, str):
             val = val.lower()   # convert to lower case
             if val in self.positions.keys():
                 pulsewidth = self.positions[val]
+                if val.lower() == 'open':
+                    isopen = True
             else:
                 print(f"{val} is not a valid claw value", file=sys.stderr)
                 return
@@ -52,8 +55,9 @@ class ClawController():
         self.rpi.set_servo_pulsewidth(self.pin_no, pulsewidth)
 
         # TODO: remove this??
-        time.sleep(0.2)
-        self.rpi.set_servo_pulsewidth(self.pin_no, 0)
+        if isopen:
+            time.sleep(0.1)
+            self.rpi.set_servo_pulsewidth(self.pin_no, 0)
 
     def _claw_handler(self, String):
         pos = String.data

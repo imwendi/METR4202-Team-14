@@ -6,8 +6,6 @@ from robot.definitions import *
 import rospy
 from std_msgs.msg import String
 from claw.definitions import NODE_DESIRED_CLAW_POS
-from claw.claw_controller import ClawController
-
 
 
 class Robot:
@@ -110,14 +108,7 @@ class Robot:
             if cube is not None:
                 target_pos = cube.avg_pos()
 
-            # if cube is not None and not cube.moving:
-            #     target_pos = cube.avg_pos()
-            # else:
-            #     if cube is not None and cube.moving:
-            #         #print("cube moving")
-            #         pass
-
-        #print('target_pos ', target_pos)
+        print('target_pos ', target_pos)
         # check target_pos is valid
         if not target_pos is None and not np.any(np.isnan(target_pos)):
             # TODO: replace with adjust?
@@ -125,22 +116,22 @@ class Robot:
             target_pos = self.adjust_target_pos(target_pos)
             self.motion_controller.move_to_pos(target_pos, ts=1)
         else:
-            #print("got here :(")
+            print("got here :(")
             # delete cube from tracked cubes
             #self.aruco_reader.remove_cube(cube.id)
             return False
 
-        if self.aruco_reader.turntable_moving():
-            print("cube started moving...")
-            # delete cube from tracked cubes
-            #self.aruco_reader.remove_cube(cube.id)
-            return False
+        # if self.aruco_reader.turntable_moving():
+        #     print("cube started moving...")
+        #     # delete cube from tracked cubes
+        #     #self.aruco_reader.remove_cube(cube.id)
+        #     return False
 
         # ensure claw is first open
         self.set_claw('open')
 
         # TODO: don't need this?
-        #time.sleep(0.2)
+        time.sleep(0.1)
 
         # move to grabbing position
         target_pos[-1] = GRAB_HEIGHT
@@ -180,12 +171,24 @@ class Robot:
         y_displacement = displacement[1]
 
         if np.abs(y_displacement) > Y_ADJUST_THRESHOLD:
-            target_pos[1] += 10*np.sign(y_displacement)
+            target_pos[1] += 5*np.sign(y_displacement)
             print("adjusted Y!")
         else:
             print("Y displacement was just ", y_displacement)
 
         target_pos[-1] = FOLLOW_HEIGHT
+
+        # radial_displacement = target_pos - TURNTABLE_CENTER
+        # displacement_norm = np.linalg.norm(radial_displacement)
+        # displacement_dir = radial_displacement / displacement_norm
+        #
+        # if displacement_norm > Y_ADJUST_THRESHOLD:
+        #     target_pos += 5*displacement_dir
+        #     print("adjusted radial displacement!")
+        # else:
+        #     print("radial displacement was just %.3f" % displacement_norm)
+        #
+        # target_pos[-1] = FOLLOW_HEIGHT
 
         return target_pos
 
