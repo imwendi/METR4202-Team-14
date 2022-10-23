@@ -38,8 +38,6 @@ class Robot:
             # a = input("type anything to continue...")
             self.sort_cube()
 
-
-
     def sort_cube(self):
         """
         Assuming a cube is grapped, checks its colour and then places it down
@@ -65,12 +63,6 @@ class Robot:
         # yeet cube
         self.set_claw('open')
         time.sleep(0.1)
-        # self.set_claw('grip')
-        # time.sleep(0.5)
-
-        # move robot back to home position
-        # dump_pos[-1] = FOLLOW_HEIGHT
-        # self.motion_controller.move_to_pos(dump_pos, ts=0.5)
         self.return_home(0.5)
 
         return True
@@ -107,12 +99,8 @@ class Robot:
         while cube is None:
             target_position = self.motion_controller.last_position
             cube = self.aruco_reader.get_closest(target_position, verbose=True)
-
             if cube is not None:
                 target_pos = cube.avg_pos()
-
-        # TODO: save target z position
-        target_z = target_pos[-1]
 
         # check target_pos is valid
         if not target_pos is None and not np.any(np.isnan(target_pos)):
@@ -123,14 +111,9 @@ class Robot:
         else:
             print("got here :(")
             # delete cube from tracked cubes
-            #self.aruco_reader.remove_cube(cube.id)
+            # TODO: is this remove needed??
+            self.aruco_reader.remove_cube(cube.id)
             return False
-
-        # if self.aruco_reader.turntable_moving():
-        #     print("cube started moving...")
-        #     # delete cube from tracked cubes
-        #     #self.aruco_reader.remove_cube(cube.id)
-        #     return False
 
         # ensure claw is first open
         self.set_claw('open')
@@ -138,26 +121,21 @@ class Robot:
         # TODO: don't need this?
         time.sleep(0.1)
 
+        # check if cube has moved again
+        cube_new_position = cube.avg_pos()
+        if np.linalg.norm(cube_new_position[:2] - target_pos[:2]) > CLOSENESS_THRESHOLD:
+            print("cube moved away :(")
+
+            self.return_home()
+            self.aruco_reader.remove_cube(cube.id)
+            return False
+
         # move to grabbing position
         target_pos = self.adjust_grab_pos(target_pos)
         self.motion_controller.move_to_pos(target_pos, ts=0.2)
         time.sleep(0.1)
 
-        # simple feedback loop for correct claw placement
-        # displacement = 42069
-        # while np.linalg.norm(displacement) > 10:
-        #     self.motion_controller.move_to_pos(target_pos, ts=0.5)
-        #     displacement = self.motion_controller.last_position - target_pos
-        #     print(f"target_pos: {target_pos}, actual_pos: {self.motion_controller.last_position}")
-
-
         self.set_claw('grip')
-        # TODO: don't need this?
-        #time.sleep(0.5)
-
-        # check color
-        #self.set_claw('grip')
-        #self.aruco_reader.remove_cube(cube.id)
 
         return True
 
@@ -236,9 +214,9 @@ class Robot:
         current_position = self.motion_controller.last_position
         current_y = current_position[1]
         if current_y > 0:
-            target_pos = ZONE_1
+            target_pos = LEFT_HOME
         else:
-            target_pos = ZONE_4
+            target_pos = RIGHT_HOME
 
         target_pos[-1] = FOLLOW_HEIGHT
 

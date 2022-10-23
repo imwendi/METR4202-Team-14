@@ -21,6 +21,9 @@ TURNTABLE_CENTER = np.array([190, 0, 0])
 # y displacement adjustment threshold
 Y_ADJUST_THRESHOLD = 40
 
+# closeness threshold between two positions
+CLOSENESS_THRESHOLD = 10
+
 # drop-off zones
 DROP_HEIGHT = 30
 ZONE_1 = np.array([10, 150, DROP_HEIGHT])
@@ -37,6 +40,9 @@ COLOR_ZONES = {
     'green': ZONE_3,
     'red': ZONE_4
 }
+
+LEFT_HOME = np.array([100, 130, FOLLOW_HEIGHT])
+RIGHT_HOME = np.array([100, -130, FOLLOW_HEIGHT])
 
 # color node
 NODE_COLOR = 'detected_color'
