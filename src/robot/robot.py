@@ -1,4 +1,6 @@
 import time
+from typing import Optional
+
 import numpy as np
 from vision.aruco_reader import ArucoReader
 from robot.motion_controller import MotionController
@@ -6,6 +8,8 @@ from robot.definitions import *
 import rospy
 from std_msgs.msg import String
 from claw.definitions import NODE_DESIRED_CLAW_POS
+from vision.cube import Cube
+from vision.definitions import CUBE_TIMEOUT
 
 
 class Robot:
@@ -27,22 +31,68 @@ class Robot:
         # last detection timetable stop time
         self.last_timetable_stop = 0
 
-
-    def set_claw(self, claw_mode):
-        self.claw_pub.publish(String(claw_mode))
-
     def task1(self, moving_turntable=True):
         if moving_turntable:
             self.wait_for_turntable()
-        if self.task1_old():
+        grabbed_cube = self.grab_cube()
+        if grabbed_cube is not None:
             # a = input("type anything to continue...")
-            self.sort_cube()
+            self.sort_cube(grabbed_cube)
 
-    def sort_cube(self):
+    def grab_cube(self):
+        self.set_claw('open')
+
+        # wait for a non-moving cube
+        cube = None
+        target_pos = None
+        while cube is None:
+            target_position = self.motion_controller.last_position
+            cube = self.aruco_reader.get_closest(target_position, verbose=True)
+            if cube is not None:
+                target_pos = cube.avg_pos()
+
+        # check target_pos is valid
+        if not target_pos is None and not np.any(np.isnan(target_pos)):
+            target_pos = self.adjust_follow_pos(target_pos)
+            self.motion_controller.move_to_pos(target_pos, ts=1)
+        else:
+            print("got here :(")
+            # delete cube from tracked cubes
+            # TODO: is this remove needed??
+            self.aruco_reader.remove_cube(cube.id)
+            return None
+
+        # ensure claw is first open
+        self.set_claw('open')
+
+        # TODO: don't need this?
+        time.sleep(0.1)
+
+        # check if cube has moved again
+        cube_new_position = cube.avg_pos()
+        if np.linalg.norm(cube_new_position[:2] - target_pos[:2]) > CLOSENESS_THRESHOLD:
+            print("cube moved away :(")
+
+            self.return_home()
+            self.aruco_reader.remove_cube(cube.id)
+            return None
+
+        # move to grabbing position
+        target_pos = self.adjust_grab_pos(target_pos)
+        self.motion_controller.move_to_pos(target_pos, ts=0.2)
+        time.sleep(0.1)
+
+        self.set_claw('grip')
+
+        return cube
+
+    def sort_cube(self, cube: Optional[Cube] = None):
         """
-        Assuming a cube is grapped, checks its colour and then places it down
+        Assuming a cube is grabbed, checks its colour and then places it down
 
         """
+        start_time = time.time()
+
         self.motion_controller.move_to_pos(COLOR_CHECK_POS, ts=0.5)
         time.sleep(1.0)
         color = self.aruco_reader.identify_color()
@@ -56,6 +106,13 @@ class Robot:
             # or drop block just in case it was grabbed
             self.set_claw('open')
             return False
+
+        # double check if cube id is still visible on table - if so then not
+        # picked up properly
+        if cube is not None:
+            if cube.update_time - start_time > CUBE_TIMEOUT:
+                self.return_home(0.5)
+                return False
 
         # move to dump zone
         self.motion_controller.move_to_pos(dump_pos, ts=1)
@@ -85,59 +142,11 @@ class Robot:
             time_past_last_stop = np.abs(current_time - self.last_timetable_stop)
             if not turntable_moving and time_past_last_stop < GRAB_CUBE_DURATION:
                 # enough time to try grab cube
-                #print("%.3fs left to grab cube" % (GRAB_CUBE_DURATION - time_past_last_stop))
                 return True
 
+    def set_claw(self, claw_mode):
+        self.claw_pub.publish(String(claw_mode))
 
-    def task1_old(self):
-        #self.aruco_reader.reset()
-        self.set_claw('open')
-
-        # wait for a non-moving cube
-        cube = None
-        target_pos = None
-        while cube is None:
-            target_position = self.motion_controller.last_position
-            cube = self.aruco_reader.get_closest(target_position, verbose=True)
-            if cube is not None:
-                target_pos = cube.avg_pos()
-
-        # check target_pos is valid
-        if not target_pos is None and not np.any(np.isnan(target_pos)):
-            # TODO: replace with adjust?
-            #target_pos[-1] = FOLLOW_HEIGHT
-            target_pos = self.adjust_follow_pos(target_pos)
-            self.motion_controller.move_to_pos(target_pos, ts=1)
-        else:
-            print("got here :(")
-            # delete cube from tracked cubes
-            # TODO: is this remove needed??
-            self.aruco_reader.remove_cube(cube.id)
-            return False
-
-        # ensure claw is first open
-        self.set_claw('open')
-
-        # TODO: don't need this?
-        time.sleep(0.1)
-
-        # check if cube has moved again
-        cube_new_position = cube.avg_pos()
-        if np.linalg.norm(cube_new_position[:2] - target_pos[:2]) > CLOSENESS_THRESHOLD:
-            print("cube moved away :(")
-
-            self.return_home()
-            self.aruco_reader.remove_cube(cube.id)
-            return False
-
-        # move to grabbing position
-        target_pos = self.adjust_grab_pos(target_pos)
-        self.motion_controller.move_to_pos(target_pos, ts=0.2)
-        time.sleep(0.1)
-
-        self.set_claw('grip')
-
-        return True
 
 
     def adjust_follow_pos(self, target_pos):
@@ -161,20 +170,7 @@ class Robot:
 
         target_pos[-1] = FOLLOW_HEIGHT
 
-        # radial_displacement = target_pos - TURNTABLE_CENTER
-        # displacement_norm = np.linalg.norm(radial_displacement)
-        # displacement_dir = radial_displacement / displacement_norm
-        #
-        # if displacement_norm > Y_ADJUST_THRESHOLD:
-        #     target_pos += 5*displacement_dir
-        #     print("adjusted radial displacement!")
-        # else:
-        #     print("radial displacement was just %.3f" % displacement_norm)
-        #
-        # target_pos[-1] = FOLLOW_HEIGHT
-
         return target_pos
-
 
     def adjust_grab_pos(self, target_pos):
         """
