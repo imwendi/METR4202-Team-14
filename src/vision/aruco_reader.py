@@ -198,14 +198,19 @@ class ArucoReader:
             if cube_position is None or np.any(np.isnan(cube_position)):
                 return None
 
-            required_robot_orientation = self.unwrap_to_90(np.arctan2(
-               cube_position[1], cube_position[0]))
+            # required_robot_orientation = np.arctan2(
+            #    cube_position[1], cube_position[0])
+
+            if cube_position[1] <= 0:
+                required_robot_orientation = np.abs(np.arctan2(cube_position[1], cube_position[0]))
+            else:
+                required_robot_orientation = np.arctan2(cube_position[0], cube_position[1])
+
             cube_orientation = self.unwrap_to_90(cube.orientation)
 
             # unwrapping large value further unwrapping
             if cube_orientation > np.deg2rad(80):
                 cube_orientation = np.pi / 2 - cube_orientation
-
             if required_robot_orientation > np.deg2rad(80):
                 required_robot_orientation = np.pi / 2 - required_robot_orientation
 

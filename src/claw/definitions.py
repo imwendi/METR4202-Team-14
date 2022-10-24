@@ -3,7 +3,7 @@ CLAW_PIN = 4
 # close position
 CLOSE = 1000
 # grip position
-GRIP = 1000
+GRIP = 1100
 # open position
 OPEN = 1850
 

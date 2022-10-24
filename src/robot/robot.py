@@ -69,7 +69,7 @@ class Robot:
         while cube is None:
             target_position = self.motion_controller.last_position
             # TODO: still needed?
-            # cube = self.aruco_reader.get_closest(target_position)
+            #cube = self.aruco_reader.get_closest(target_position)
             cube = self.aruco_reader.get_closest_orientation()
             if cube is not None:
                 target_pos = cube.avg_pos()
@@ -77,7 +77,7 @@ class Robot:
         # check target_pos is valid
         if not target_pos is None and not np.any(np.isnan(target_pos)):
             target_pos = self.adjust_follow_pos(target_pos)
-            self.motion_controller.move_to_pos(target_pos, ts=1)
+            self.motion_controller.move_to_pos(target_pos, ts=1.5)
         else:
             print("got here :(")
             # delete cube from tracked cubes
@@ -93,14 +93,15 @@ class Robot:
         if np.linalg.norm(cube_new_position[:2] - target_pos[:2]) > CLOSENESS_THRESHOLD:
             print("cube moved away :(")
 
-            self.return_home()
+            self.return_home(0.5)
+            self.set_claw('open')
             self.aruco_reader.remove_cube(cube.id)
             return None
 
         # move to grabbing position
         target_pos = self.adjust_grab_pos(target_pos)
-        self.motion_controller.move_to_pos(target_pos, ts=0.2)
-        time.sleep(0.1)
+        self.motion_controller.move_to_pos(target_pos, ts=0.4)
+        time.sleep(0.25)
 
         self.set_claw('grip')
 
@@ -116,8 +117,8 @@ class Robot:
         """
         start_time = time.time()
 
-        self.motion_controller.move_to_pos(COLOR_CHECK_POS, ts=0.5)
-        time.sleep(1.0)
+        self.motion_controller.move_to_pos(COLOR_CHECK_POS, ts=2)
+        time.sleep(1.5)
         color = self.aruco_reader.identify_color()
         print(f"picked up {color} block!")
         if color in COLOR_ZONES.keys():
@@ -201,7 +202,7 @@ class Robot:
         x_displacement, y_displacement = displacement[:2]
 
         if np.abs(y_displacement) > Y_ADJUST_THRESHOLD:
-            target_pos[1] += 8*np.sign(y_displacement)
+            target_pos[1] += 0*np.sign(y_displacement)
             print("adjusted Y!")
         else:
             print("Y displacement was just ", y_displacement)
